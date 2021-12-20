@@ -15,6 +15,10 @@ void Input::setDefaultOptions()
     m_temperature_init = 3000;
     m_distance = 1e-3;
     m_maxstep = 100;
+    m_pert_m = 1e-2;
+    m_pert_T = 1.0;
+    m_tol = 1.0e-12;
+    m_iNewtonhistory = "false";
 #ifdef _WIN32
     m_separator = '\\';
 #else
@@ -119,6 +123,51 @@ void Input::maxstepinit(const int &maxstep)
     m_maxstep = maxstep;
 }
 
+/// Gets the init increment species density.
+const double &Input::pertminit()
+{
+    return m_pert_m;
+}
+
+/// Sets the init increment species density.
+void Input::pertminit(const double& pert_m)
+{
+    m_pert_m = pert_m;
+}
+
+/// Gets the init increment temperature.
+const double &Input::pertTinit()
+{
+    return m_pert_T;
+}
+
+/// Sets the init increment temperature.
+void Input::pertTinit(const double& pert_T)
+{
+    m_pert_T = pert_T;
+}
+
+const double &Input::tolinit()
+{
+    return m_tol;
+}
+
+/// Sets the init increment temperature.
+void Input::tolinit(const double& tol)
+{
+    m_tol = tol;
+}
+
+const std::string &Input::iNewtonhistory()
+{
+    return m_iNewtonhistory;
+}
+
+/// Sets the init increment temperature.
+void Input::iNewtonhistory(const std::string& inewtonhistory)
+{
+    m_iNewtonhistory = inewtonhistory;
+}
 /// Gets the file separator character.
 const char Input::separator()
 {
@@ -147,11 +196,10 @@ void Input::loadFromXmlElement(IO::XmlElement &element)
     if (element.tag() != "input")
         element.parseError(
             "XmlElement is not of 'input' type!");
-    
+
     IO::XmlElement::const_iterator iter;
     for (iter = element.begin(); iter != element.end(); ++iter)
     {
-
     }
 
     element.getAttribute<std::string>("data_directory", m_data_directory, m_data_directory);
@@ -170,7 +218,19 @@ void Input::loadFromXmlElement(IO::XmlElement &element)
     element.getAttribute<double>("distance", m_distance, "distance must be given");
 
     // Get the type of Gas-Surface Interaction for the wall
-    element.getAttribute<int>("maxstep", m_maxstep, "maxstep must be given");
+    element.getAttribute<int>("maxstep", m_maxstep, m_maxstep);
+
+    // Get the type of Gas-Surface Interaction for the wall
+    element.getAttribute<double>("pert_m", m_pert_m, m_pert_m);
+
+    // Get the type of Gas-Surface Interaction for the wall
+    element.getAttribute<double>("pert_T", m_pert_T, m_pert_T);
+
+    // Get the type of Gas-Surface Interaction for the wall
+    element.getAttribute<double>("tolerance", m_tol, m_tol);
+
+    // Get the type of Gas-Surface Interaction for the wall
+    element.getAttribute<std::string>("iNewtonhistory", m_iNewtonhistory, m_iNewtonhistory);
 
     // IO::XmlElement::const_iterator iter;
     // for (iter = element.begin(); iter != element.end(); ++iter)

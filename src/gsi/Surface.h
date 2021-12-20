@@ -185,6 +185,48 @@ public:
         << "the surface energy balance!";
     }
 
+    /**
+     * Purely virtual function to be called to write iterational history
+     * iterations performed in the surface balance.
+     */
+    virtual void setIterationsHistory(const bool& iof)
+    {
+        throw LogicError()
+        << "setIterationsHistory can be called only when solving "
+        << "the surface energy balance!";
+    }
+
+    /**
+     * Purely virtual function to be called to change the number of
+     * iterations performed in the surface balance.
+     */
+    virtual void setIterationsEps(const double& eps)
+    {
+        throw LogicError()
+        << "setIterationsEps can be called only when solving "
+        << "the surface energy balance!";
+    }
+    /**
+     * Purely virtual function to be called to change the increment of
+     * species density performed in the surface balance.
+     */
+    virtual void setIterationsPert_m(const double& pert_m)
+    {
+        throw LogicError()
+        << "setIterationsPert_m can be called only when solving "
+        << "the surface energy balance!";
+    }
+    /**
+     * Purely virtual function to be called to change the increment of
+     * temperature performed in the surface balance.
+     */
+    virtual void setIterationsPert_T(const double& Pert_T)
+    {
+        throw LogicError()
+        << "setIterationsPert_T can be called only when solving "
+        << "the surface energy balance!";
+    }
+
 //==============================================================================
 
     /**

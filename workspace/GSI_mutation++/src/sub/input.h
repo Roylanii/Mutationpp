@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Mutation::Utilities;
 
-/// Singleton class providing access to global options.
+/// Input class providing access to global options.
 class Input
 {
 public:
@@ -64,6 +64,30 @@ public:
     /// Sets the init temperature.
     void maxstepinit(const int &maxstep);
 
+    /// Gets the init increment species density.
+    const double &pertminit();
+
+    /// Sets the init increment species density.
+    void pertminit(const double &pert_m);
+
+    /// Gets the init increment temperature.
+    const double &pertTinit();
+
+    /// Sets the init increment temperature.
+    void pertTinit(const double &pert_T);
+
+        /// Gets the tolerance for Newton solver.
+    const double &tolinit();
+
+    /// Sets the tolerance for Newton solver.
+    void tolinit(const double &tol);
+
+    /// Switch to iteration history of Newton solver.
+    const std::string& iNewtonhistory();
+
+    /// Switch to iteration history of Newton solver.
+    void iNewtonhistory(const std::string& inewtonhistory);
+
     /// Gets the file separator character.
     const char separator();
 
@@ -107,6 +131,18 @@ private:
 
     ///Max step for Newton iteration
     int m_maxstep;
+
+    ///increment for species density performs in Newton solver
+    double m_pert_m;
+
+    ///increment for temperature performs in Newton solver
+    double m_pert_T;
+
+    ///Tolerance in Newton solver
+    double m_tol;
+
+    ///Whether write history in Newton solver
+    std::string m_iNewtonhistory;
 
     /// File separator character
     char m_separator;

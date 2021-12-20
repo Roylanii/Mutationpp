@@ -186,6 +186,12 @@ public:
 //==============================================================================
 
     void setIterationsSurfaceBalance(const int& iter){ setMaxIterations(iter); }
+    void setIterationsHistory(const bool& iof){ setWriteConvergenceHistory(iof); }
+    void setIterationsEps(const double& eps){ setEpsilon(eps); }
+    void setIterationsPert_m(const double& pert_m)
+    {
+        m_pert=pert_m;
+    }
 
 //==============================================================================
 

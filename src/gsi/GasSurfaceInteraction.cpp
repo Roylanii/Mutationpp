@@ -208,6 +208,26 @@ void GasSurfaceInteraction::setIterationsSurfaceBalance(const int& iter)
     mp_surf->setIterationsSurfaceBalance(iter);
 }
 
+void GasSurfaceInteraction::setIterationsHistory(const bool& iof)
+{
+    mp_surf->setIterationsHistory(iof);
+}
+
+void GasSurfaceInteraction::setIterationsEps(const double& eps)
+{
+    mp_surf->setIterationsEps(eps);
+}
+
+void GasSurfaceInteraction::setIterationsPert_m(const double& pert_m)
+{
+    mp_surf->setIterationsPert_m(pert_m);
+}
+
+void GasSurfaceInteraction::setIterationsPert_T(const double& pert_T)
+{
+    mp_surf->setIterationsPert_T(pert_T);
+}
+
 //==============================================================================
 
 void GasSurfaceInteraction::getMassBlowingRate(double& mdot){

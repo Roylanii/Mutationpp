@@ -173,6 +173,32 @@ public:
     void setIterationsSurfaceBalance(const int& iter);
 
     /**
+     * Function which allows to write iteration history when solving
+     * the surface balance at the interface. The default value is 5.
+     */
+    void setIterationsHistory(const bool& iof);
+
+    /**
+     * Function which allows to change the tolerance of iterations when solving
+     * the surface balance at the interface. The default value is 1e-12.
+     */
+    void setIterationsEps(const double& eps);
+
+    /**
+     *@brief Sets species density increment for Newton solver
+     *@param pert_m increment for species density
+     *
+    **/
+    void setIterationsPert_m(const double& pert_m);
+    
+    /**
+     *@brief Sets temperature increment for Newton solver
+     *@param pert_T increment for temperature
+     *
+    **/
+    void setIterationsPert_T(const double& pert_T);
+
+    /**
      * Function which return the total mass blowing flux.
      *
      * @param mdot on return mass blowing flux kg/(m^2-s)

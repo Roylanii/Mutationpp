@@ -15,20 +15,14 @@ void getOptLong(int argc, char *argv[], std::map<int, std::string> &input)
     int option_index = 0;
     // 设置短参数类型及是否需要参数
     const char *optstring = "a";
-
-    // 设置长参数类型及其简写，比如 --reqarg <==>-r
     /*
     struct option {
              const char * name;  // 参数的名称
              int has_arg; // 是否带参数值，有三种：no_argument， required_argument，optional_argument
              int * flag; // 为空时，函数直接将 val 的数值从getopt_long的返回值返回出去，
-                     // 当非空时，val的值会被赋到 flag 指向的整型数中，而函数返回值为0
+                         当非空时，val的值会被赋到 flag 指向的整型数中，而函数返回值为0
              int val; // 用于指定函数找到该选项时的返回值，或者当flag非空时指定flag指向的数据的值
         };
-    其中：
-        no_argument(即0)，表明这个长参数不带参数（即不带数值，如：--name）
-            required_argument(即1)，表明这个长参数必须带参数（即必须带数值，如：--name Bob）
-            optional_argument(即2)，表明这个长参数后面带的参数是可选的，（即--name和--name Bob均可）
      */
     static struct option long_options[] = {
         {"workdir", required_argument, NULL, 'a'},
@@ -59,11 +53,6 @@ void getOptLong(int argc, char *argv[], std::map<int, std::string> &input)
             input.insert(std::pair<int, std::string>(2, optarg));
         else if (opt == 'd')
             input.insert(std::pair<int, std::string>(3, optarg));
-        // else
-        // {
-        //     throw LogicError()
-        //     << "input argument wrong";
-        // }
     }
 }
 int main(int argc, char *argv[])
@@ -72,7 +61,7 @@ int main(int argc, char *argv[])
 
     //read input from argv
     // std::map<int, std::string> input;
-    // getOptLong(argc, argv, input); 
+    // getOptLong(argc, argv, input);
     // std::map<int, std::string>::iterator map_iter;
     // map_iter = input.find(0);
     // if (map_iter != input.end())
@@ -84,13 +73,12 @@ int main(int argc, char *argv[])
     // map_iter = input.find(3);
     // double T_init = stod(map_iter->second);
 
-
     // Mixture
     //MixtureOptions opts("seb_oxidation_NASA9_ChemNonEq1T");
 
-    //Read input 
+    //Read input
     Input input("input.xml");
-    
+
     Mutation::GlobalOptions::workingDirectory(input.workingDirectory());
     Mutation::GlobalOptions::dataDirectory(input.dataDirectory());
     MixtureOptions opts(input.mixturename());
@@ -108,8 +96,13 @@ int main(int argc, char *argv[])
 
     mix.equilibrate(Teq(pos_T_trans), P_init);
     // Setting number of iterations for the solver
-    const int iter = input.maxstepinit();
-    mix.setIterationsSurfaceBalance(iter);
+    mix.setIterationsSurfaceBalance(input.maxstepinit());
+    mix.setIterationsPert_m(input.pertminit());
+    mix.setIterationsPert_T(input.pertTinit());
+    mix.setIterationsEps(input.tolinit());
+    bool iNewtonhistory;
+    std::istringstream(input.iNewtonhistory()) >> std::boolalpha >> iNewtonhistory;
+    mix.setIterationsHistory(iNewtonhistory);
 
     // Mass gradient
     VectorXd xi_e(ns);
@@ -182,43 +175,50 @@ int main(int argc, char *argv[])
     F.tail(nT) = -lambda.cwiseProduct(dTdx) - q_srad + mblow * v_h -
                  v_hi_rhoi_vi;
 
-    // Compute error
-    double err = F.lpNorm<Infinity>();
-    std::cout << "Solving gas surface interaction done!" << std::endl;
-    std::cout << "The L_infty norm of the specie density error and energy error is :";
-    std::cout << std::setw(13) << err; // Cp [J/kg-K]
+    // Compute error and write
+    //double err = F.lpNorm<Infinity>();
+    std::cout << std::endl;
+    std::cout << "The residual of gas surface interaction:" << std::endl;
+    std::cout << std::setw(18) << "Res.AVG(mass)";
+    std::cout << std::setw(18) << "Res.MAX(mass)";
+    std::cout << std::setw(18) << "Res.AVG(energy)";
+    std::cout << std::setw(18) << "Res.MAX(energy)";
+    std::cout << std::endl;
+    std::cout << std::setw(18) << F.head(ns).lpNorm<1>();
+    std::cout << std::setw(18) << F.head(ns).lpNorm<Infinity>();
+    std::cout << std::setw(18) << F.tail(nT).lpNorm<1>();
+    std::cout << std::setw(18) << F.tail(nT).lpNorm<Infinity>();
     std::cout << std::endl;
     // Write a header line for the table
     //Temperature
-    std::cout << "Surface temperature[K]" <<std::endl;
+    std::cout << std::setw(28) << "Surface balance temperature[K]" << std::endl;
     for (int j = 0; j < nT; ++j)
-        std::cout << std::setw(13) << T_s(j);
+        std::cout << std::setw(28) << T_s(j);
     std::cout << std::endl;
 
-    std::cout << std::setw(22) << "Blowing flux[kg/m^2-s]" << std::endl;
-    std::cout << std::setw(22) << mblow;
+    std::cout << std::setw(28) << "Surface blowing flux[kg/m^2-s]" << std::endl;
+    std::cout << std::setw(28) << mblow;
     std::cout << std::endl;
 
-    std::cout << "Surface species property" <<std::endl;
-    std::cout <<setw(28) << "";
+    std::cout << "Surface species property" << std::endl;
+    std::cout << setw(24) << "";
     for (int j = 0; j < ns; ++j)
         std::cout << std::setw(13) << mix.speciesName(j);
     std::cout << std::endl;
 
-    //species density 
-    std::cout <<setw(28) << "Species density[kg/m^3]";
+    //species density
+    std::cout << setw(24) << "Species density[kg/m^3]";
     for (int j = 0; j < ns; ++j)
         std::cout << std::setw(13) << rhoi_s(j);
     std::cout << std::endl;
-    std::cout <<setw(28) << "Species mole fraction";
+    std::cout << setw(24) << "Species mole fraction";
     for (int j = 0; j < mix.nSpecies(); ++j)
         std::cout << std::setw(13) << mix.X()[j];
     std::cout << std::endl;
 
     //chemical source
-    std::cout <<setw(28) << "Chemical mass[kg/m^2-s]";
+    std::cout << setw(24) << "Chemical mass[kg/m^2-s]";
     for (int j = 0; j < ns; ++j)
         std::cout << std::setw(13) << wdot(j);
-    std::cout << std::endl;    
-    
+    std::cout << std::endl;
 }
