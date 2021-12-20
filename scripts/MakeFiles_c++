@@ -1,0 +1,20 @@
+# Change this path to your Mutation++ install path
+MPP_INSTALL_DIR = $(MPP_DIRECTORY)/install
+CXX_FLAGS = -I $(MPP_INSTALL_DIR)/include \
+-I $(MPP_INSTALL_DIR)/include/mutation++ \
+-I $(MPP_DIRECTORY)/thirdparty/eigen \
+-O3 -std=c++11
+# use .dylib for Mac, .so for Unix
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+CXX = g++
+CXX_LIBS = $(MPP_INSTALL_DIR)/lib/libmutation++.so
+endif
+ifeq ($(UNAME_S),Darwin)
+CXX = c++
+CXX_LIBS = $(MPP_INSTALL_DIR)/lib/libmutation++.dylib
+endif
+hello : hello.o
+$(CXX) -o $@ $(CXX_FLAGS) $^ $(CXX_LIBS)
+%.o : %.cpp
+$(CXX) -c $(CXX_FLAGS) $<
