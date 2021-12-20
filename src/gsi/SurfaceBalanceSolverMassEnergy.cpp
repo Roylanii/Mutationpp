@@ -121,7 +121,7 @@ public:
 
         // Setup NewtonSolver
         setMaxIterations(5);
-        setWriteConvergenceHistory(false);
+        setWriteConvergenceHistory(true);
         setEpsilon(m_tol);
     }
 

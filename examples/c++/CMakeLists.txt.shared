@@ -12,7 +12,11 @@ project(${example_name})
 if(NOT TARGET mutation++)
     find_package(mutation++ REQUIRED)
 endif()
-
+#find_package(Eigen3 REQUIRED)
+#message("Eigen++ = ${Eigen3_FOUND},include= ${EIGEN3_INCLUDE_DIRS}")
+#message("mutation++ = ${mutation++_FOUND},include= ${mutation++_LIBRARIES}")
+#include_directories(mutation++_INCLUDE_DIR)
+include_directories(/home/zhangjc/gitee/Mutation/Mutationpp/install/include/mutation++)
 add_executable(${example_name} ${example_name}.cpp)
 target_link_libraries(${example_name}
     PRIVATE

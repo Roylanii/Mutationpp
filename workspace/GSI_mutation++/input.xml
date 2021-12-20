@@ -1,0 +1,11 @@
+<input
+	#data_directory="/home/zhangjc/gitee/Mutation/Mutationpp/data"
+	working_directory="data"
+	#mixture_name="seb_oxidation_NASA9_ChemNonEq1T"
+	mixture_name="seb_carbon_ablation"
+	#mixture_name="seb_carbon_ablation_catalysis"
+	pressure_init="1000"
+	temperature_init="3000"
+	distance="1e-3"
+	maxstep="500">
+</input>

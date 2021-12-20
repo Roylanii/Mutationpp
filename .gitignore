@@ -21,3 +21,7 @@ _skbuild/
 
 # OS specifics
 .DS_Store
+
+#user-defined
+xx
+workspace/*/build
