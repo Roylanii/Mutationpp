@@ -208,6 +208,16 @@ void GasSurfaceInteraction::setIterationsSurfaceBalance(const int& iter)
     mp_surf->setIterationsSurfaceBalance(iter);
 }
 
+std::string GasSurfaceInteraction::getGSIMechanism()
+{
+    return m_gsi_mechanism;
+}
+
+double GasSurfaceInteraction::getSurfaceRadiativeHeatFlux()
+{
+    return mp_surf->getSurfaceRadiativeHeatFlux();
+}
+
 void GasSurfaceInteraction::setIterationsHistory(const bool& iof)
 {
     mp_surf->setIterationsHistory(iof);

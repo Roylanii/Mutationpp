@@ -230,6 +230,8 @@ public:
 
     void setIterationsSurfaceBalance(const int& iter){ setMaxIterations(iter); }
 
+    double getSurfaceRadiativeHeatFlux() {return mp_surf_rad->surfaceNetRadiativeHeatFlux();}
+
     void setIterationsHistory(const bool& iof){ setWriteConvergenceHistory(iof); }
 
     void setIterationsEps(const double& eps){ setEpsilon(eps); }

@@ -69,7 +69,7 @@ public:
      * steady state conduction and pyrolysis cases. If it is undefined its
      * value is aytomatically set equal to one.
      */
-    double getPhiRatio() const { return 1.; }
+    double getPhiRatio() const { return m_phi; }
 
 //==============================================================================
 
@@ -77,7 +77,7 @@ public:
      * Returns the enthalpy of the virgin material equal to the one set
      * in the gsi input file. If it is unset this value defaults to 0.
      */
-    double getEnthalpyVirginMaterial() const { return 0.; }
+    double getEnthalpyVirginMaterial() const { return m_h_v; }
 
 private:
     double m_phi;

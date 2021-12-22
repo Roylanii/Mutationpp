@@ -172,6 +172,10 @@ public:
      */
     void setIterationsSurfaceBalance(const int& iter);
 
+    double getSurfaceRadiativeHeatFlux();
+
+    std::string getGSIMechanism();
+
     /**
      * Function which allows to write iteration history when solving
      * the surface balance at the interface. The default value is 5.

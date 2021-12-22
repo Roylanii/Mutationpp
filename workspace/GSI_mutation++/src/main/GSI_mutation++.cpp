@@ -59,20 +59,6 @@ int main(int argc, char *argv[])
 {
     const double tol = std::numeric_limits<double>::epsilon();
 
-    //read input from argv
-    // std::map<int, std::string> input;
-    // getOptLong(argc, argv, input);
-    // std::map<int, std::string>::iterator map_iter;
-    // map_iter = input.find(0);
-    // if (map_iter != input.end())
-    //     Mutation::GlobalOptions::workingDirectory(map_iter->second);
-    // map_iter = input.find(1);
-    // MixtureOptions opts(map_iter->second.c_str());
-    // map_iter = input.find(2);
-    // double P_init = stod(map_iter->second);
-    // map_iter = input.find(3);
-    // double T_init = stod(map_iter->second);
-
     // Mixture
     //MixtureOptions opts("seb_oxidation_NASA9_ChemNonEq1T");
 
@@ -85,6 +71,14 @@ int main(int argc, char *argv[])
     Mixture mix(opts);
     double P_init = input.pressureinit();
     double T_init = input.temperatureinit();
+    // Setting number of iterations for the solver
+    mix.setIterationsSurfaceBalance(input.maxstepinit());
+    mix.setIterationsPert_m(input.pertminit());
+    mix.setIterationsPert_T(input.pertTinit());
+    mix.setIterationsEps(input.tolinit());
+    bool iNewtonhistory;
+    std::istringstream(input.iNewtonhistory()) >> std::boolalpha >> iNewtonhistory;
+    mix.setIterationsHistory(iNewtonhistory);
     // Setting up
     const size_t set_state_with_rhoi_T = 1;
     const size_t pos_T_trans = 0;
@@ -95,14 +89,6 @@ int main(int argc, char *argv[])
     VectorXd Teq = VectorXd::Constant(nT, T_init);
 
     mix.equilibrate(Teq(pos_T_trans), P_init);
-    // Setting number of iterations for the solver
-    mix.setIterationsSurfaceBalance(input.maxstepinit());
-    mix.setIterationsPert_m(input.pertminit());
-    mix.setIterationsPert_T(input.pertTinit());
-    mix.setIterationsEps(input.tolinit());
-    bool iNewtonhistory;
-    std::istringstream(input.iNewtonhistory()) >> std::boolalpha >> iNewtonhistory;
-    mix.setIterationsHistory(iNewtonhistory);
 
     // Mass gradient
     VectorXd xi_e(ns);
@@ -112,7 +98,8 @@ int main(int argc, char *argv[])
 
     // Temperature gradient
     VectorXd T_e = Teq;
-    mix.setGasFourierHeatFluxModel(T_e.data(), dx);
+    if (mix.getGSIMechanism() == "phenomenological_mass_energy")
+        mix.setGasFourierHeatFluxModel(T_e.data(), dx);
 
     // Initial conditions of the surface are the ones in the first
     // physical cell
@@ -140,9 +127,12 @@ int main(int argc, char *argv[])
 
     // Conductive heat flux
     VectorXd dTdx(nT);
-    dTdx = (T_s - T_e) / dx;
     VectorXd lambda(nT);
-    mix.frozenThermalConductivityVector(lambda.data());
+    if (mix.getGSIMechanism() == "phenomenological_mass_energy")
+    {
+        dTdx = (T_s - T_e) / dx;
+        mix.frozenThermalConductivityVector(lambda.data());
+    }
 
     // Get surface production rates
     VectorXd wdot(ns);
@@ -160,20 +150,22 @@ int main(int argc, char *argv[])
     v_h(pos_T_trans) = (rhoi_s / rho).dot(v_hi.head(ns));
 
     // Surface radiation
-    const double sigma = 2. * pow(PI, 5) * pow(KB, 4) / (15 * pow(C0, 2) * pow(HP, 3));
-    const double eps = .86;
     VectorXd q_srad = VectorXd::Zero(nT);
-    q_srad(pos_T_trans) = sigma * eps * pow(T_s(pos_T_trans), 4);
+    if (mix.getGSIMechanism() == "phenomenological_mass_energy")
+        q_srad(pos_T_trans) = mix.getSurfaceRadiativeHeatFlux();
 
     // Chemical Energy Contribution
     VectorXd v_hi_rhoi_vi = VectorXd::Zero(nT);
     v_hi_rhoi_vi(pos_T_trans) = -v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
 
     // Building balance functions
-    VectorXd F(neq);
+    VectorXd F(ns);
+    if (mix.getGSIMechanism() == "phenomenological_mass_energy")
+        F.resize(neq);
     F.head(ns) = (rhoi_s / rho) * mblow + rhoi_s.cwiseProduct(vdi) - wdot;
-    F.tail(nT) = -lambda.cwiseProduct(dTdx) - q_srad + mblow * v_h -
-                 v_hi_rhoi_vi;
+    if (mix.getGSIMechanism() == "phenomenological_mass_energy")
+        F.tail(nT) = -lambda.cwiseProduct(dTdx) - q_srad + mblow * v_h -
+                     v_hi_rhoi_vi;
 
     // Compute error and write
     //double err = F.lpNorm<Infinity>();
@@ -221,4 +213,20 @@ int main(int argc, char *argv[])
     for (int j = 0; j < ns; ++j)
         std::cout << std::setw(13) << wdot(j);
     std::cout << std::endl;
+
+#if 0
+        //read input from argv
+    // std::map<int, std::string> input;
+    // getOptLong(argc, argv, input);
+    // std::map<int, std::string>::iterator map_iter;
+    // map_iter = input.find(0);
+    // if (map_iter != input.end())
+    //     Mutation::GlobalOptions::workingDirectory(map_iter->second);
+    // map_iter = input.find(1);
+    // MixtureOptions opts(map_iter->second.c_str());
+    // map_iter = input.find(2);
+    // double P_init = stod(map_iter->second);
+    // map_iter = input.find(3);
+    // double T_init = stod(map_iter->second);
+#endif
 }

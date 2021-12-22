@@ -185,6 +185,13 @@ public:
         << "the surface energy balance!";
     }
 
+    virtual double getSurfaceRadiativeHeatFlux()
+    {
+        throw LogicError()
+        << "getSufaceRadiativeHeatFlux can be called only when solving "
+        << "the surface energy balance!";
+    }
+
     /**
      * Purely virtual function to be called to write iterational history
      * iterations performed in the surface balance.
@@ -222,9 +229,11 @@ public:
      */
     virtual void setIterationsPert_T(const double& Pert_T)
     {
-        throw LogicError()
-        << "setIterationsPert_T can be called only when solving "
-        << "the surface energy balance!";
+        // throw LogicError()
+        // << "setIterationsPert_T can be called only when solving "
+        // << "the surface energy balance!";
+        std::cout << "WARNING! setIterationsPert_T can be called only when \
+        solving the surface energy balance! This setting is inactive!";
     }
 
 //==============================================================================
