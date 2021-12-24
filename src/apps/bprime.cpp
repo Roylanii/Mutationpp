@@ -59,7 +59,8 @@ using namespace Mutation::Utilities;
  * mole fractions at the wall versus temperature.
  */
 // Simply stores the command line options
-typedef struct {
+typedef struct
+{
     double T1;
     double T2;
     double dT;
@@ -75,14 +76,16 @@ typedef struct {
 } Options;
 
 // Checks if an option is present
-bool optionExists(int argc, char** argv, const std::string& option) {
+bool optionExists(int argc, char **argv, const std::string &option)
+{
     return (std::find(argv, argv + argc, option) != argv + argc);
 }
 
 // Returns the value associated with a particular option
-std::string getOption(int argc, char** argv, const std::string& option) {
+std::string getOption(int argc, char **argv, const std::string &option)
+{
     std::string value;
-    char** ptr = std::find(argv, argv + argc, option);
+    char **ptr = std::find(argv, argv + argc, option);
 
     if (ptr == argv + argc || ptr + 1 == argv + argc)
         value = "";
@@ -93,7 +96,8 @@ std::string getOption(int argc, char** argv, const std::string& option) {
 }
 
 // Prints the program's usage information and exits.
-void printHelpMessage(const char* const name) {
+void printHelpMessage(const char *const name)
+{
     std::string tab("    ");
 
     cout.setf(std::ios::left, std::ios::adjustfield);
@@ -146,28 +150,32 @@ void printHelpMessage(const char* const name) {
 }
 
 // Parses a temperature or pressure range
-bool parseRange(const std::string& range, double& x1, double& x2, double& dx) {
+bool parseRange(const std::string &range, double &x1, double &x2, double &dx)
+{
     std::vector<std::string> tokens;
     String::tokenize(range, tokens, ":");
 
-    if (!String::isNumeric(tokens)) return false;
+    if (!String::isNumeric(tokens))
+        return false;
 
-    switch (tokens.size()) {
-        case 1:
-            x1 = atof(tokens[0].c_str());
-            x2 = x1;
-            dx = 1.0;
-            break;
-        case 3:
-            x1 = atof(tokens[0].c_str());
-            x2 = atof(tokens[2].c_str());
-            dx = atof(tokens[1].c_str());
-            break;
-        default:
-            return false;
+    switch (tokens.size())
+    {
+    case 1:
+        x1 = atof(tokens[0].c_str());
+        x2 = x1;
+        dx = 1.0;
+        break;
+    case 3:
+        x1 = atof(tokens[0].c_str());
+        x2 = atof(tokens[2].c_str());
+        dx = atof(tokens[1].c_str());
+        break;
+    default:
+        return false;
     }
 
-    if (dx == 0.0) {
+    if (dx == 0.0)
+    {
         x2 = x1;
         dx = 1.0;
     }
@@ -175,11 +183,13 @@ bool parseRange(const std::string& range, double& x1, double& x2, double& dx) {
     return true;
 }
 
-bool parseRange(const std::string& range, double& x1) {
+bool parseRange(const std::string &range, double &x1)
+{
     std::vector<std::string> tokens;
     String::tokenize(range, tokens, ":");
 
-    if (!String::isNumeric(tokens)) return false;
+    if (!String::isNumeric(tokens))
+        return false;
 
     x1 = atof(tokens[0].c_str());
 
@@ -187,61 +197,82 @@ bool parseRange(const std::string& range, double& x1) {
 }
 
 // Parse the command line options to determine what the user wants to do
-Options parseOptions(int argc, char** argv) {
+Options parseOptions(int argc, char **argv)
+{
     Options opts;
 
     // Print the help message and exit if desired
-    if (argc < 2) printHelpMessage(argv[0]);
+    if (argc < 2)
+        printHelpMessage(argv[0]);
 
     if (optionExists(argc, argv, "-h") || optionExists(argc, argv, "--help"))
         printHelpMessage(argv[0]);
 
     // Get the temperature range
-    if (optionExists(argc, argv, "-T")) {
+    if (optionExists(argc, argv, "-T"))
+    {
         if (!parseRange(getOption(argc, argv, "-T"), opts.T1, opts.T2,
-                        opts.dT)) {
+                        opts.dT))
+        {
             cout << "Bad format for temperature range!" << endl;
             printHelpMessage(argv[0]);
         }
-    } else {
+    }
+    else
+    {
         opts.T1 = 300.0;
         opts.T2 = 15000.0;
         opts.dT = 100.0;
     }
 
     // Get the pressure range
-    if (optionExists(argc, argv, "-P")) {
-        if (!parseRange(getOption(argc, argv, "-P"), opts.P1)) {
+    if (optionExists(argc, argv, "-P"))
+    {
+        if (!parseRange(getOption(argc, argv, "-P"), opts.P1))
+        {
             cout << "Bad format for pressure !" << endl;
             printHelpMessage(argv[0]);
         }
-    } else {
+    }
+    else
+    {
         opts.P1 = ONEATM;
     }
 
     // Get the pressure range
-    if (optionExists(argc, argv, "-b")) {
-        if (!parseRange(getOption(argc, argv, "-b"), opts.Bg)) {
+    if (optionExists(argc, argv, "-b"))
+    {
+        if (!parseRange(getOption(argc, argv, "-b"), opts.Bg))
+        {
             cout << "Bad format for pressure !" << endl;
             printHelpMessage(argv[0]);
         }
-    } else {
+    }
+    else
+    {
         opts.Bg = 0;
     }
 
-    if (optionExists(argc, argv, "-m")) {
+    if (optionExists(argc, argv, "-m"))
+    {
         opts.mixture = getOption(argc, argv, "-m");
-    } else {
+    }
+    else
+    {
         printHelpMessage(argv[0]);
     }
 
-    if (optionExists(argc, argv, "-bl")) {
+    if (optionExists(argc, argv, "-bl"))
+    {
         opts.boundary_layer_comp = getOption(argc, argv, "-bl");
-    } else {
+    }
+    else
+    {
         printHelpMessage(argv[0]);
     }
 
-    if (optionExists(argc, argv, "-py")) {
+    if (optionExists(argc, argv, "-py"))
+    {
         opts.pyrolysis_composition = getOption(argc, argv, "-py");
         opts.pyrolysis_exist = true;
     }
@@ -249,7 +280,8 @@ Options parseOptions(int argc, char** argv) {
     return opts;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 #ifdef _GNU_SOURCE
     feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
 #endif
@@ -273,21 +305,51 @@ int main(int argc, char* argv[]) {
     double Bg = opts.Bg;
     double Bc, hw;
 
+    mix.getComposition(opts.boundary_layer_comp, Yke.data(),
+                       Composition::MASS);
     if (opts.pyrolysis_exist)
         mix.getComposition(opts.pyrolysis_composition, Ykg.data(),
                            Composition::MASS);
 
-    cout << setw(10) << "\"Tw[K]\"" << setw(15) << "\"B'c\"" << setw(15)
-         << "\"hw[MJ/kg]\"";
-    for (int i = 0; i < ns; ++i)
-        cout << setw(25) << "\"" + mix.speciesName(i) + "\"";
-    cout << endl;
+    // cout << setw(10) << "\"Tw[K]\"" << setw(15) << "\"B'c\"" << setw(15)
+    //      << "\"hw[MJ/kg]\"";
+    // for (int i = 0; i < ns; ++i)
+    //     cout << setw(25) << "\"" + mix.speciesName(i) + "\"";
+    // cout << endl;
 
-    for (double T = T1; T < T2 + 1.0e-6; T += dt) {
-        mix.surfaceMassBalance(Yke.data(), Ykg.data(), T, P, Bg, Bc, hw,
+    // for (double T = T1; T < T2 + 1.0e-6; T += dt) {
+    //     mix.surfaceMassBalance(Yke.data(), Ykg.data(), T, P, Bg, Bc, hw,
+    //                            Xw.data());
+    //     cout << setw(10) << T << setw(15) << Bc << setw(15) << hw / 1.0e6;
+    //     for (int i = 0; i < ns; ++i) cout << setw(25) << Xw[i];
+    //     cout << endl;
+    // }
+
+    ofstream outfile;
+    outfile.open("bprime_table.dat");
+    outfile << "mixture= " << opts.mixture << "Bg'=" << opts.Bg << "presure=" << opts.P1 << endl;
+    outfile << "VARIABLES="
+            << "\"Tw[K]\","
+            << "\"B'<sub>g</sub>=0.0\","
+            << "\"B'<sub>g</sub>=0.1\","
+            << "\"B'<sub>g</sub>=0.2\","
+            << "\"B'<sub>g</sub>=0.5\","
+            << "\"B'<sub>g</sub>=1.0\","
+            << "\"B'<sub>g</sub>=2.0\","
+            << "\"B'<sub>g</sub>=5.0\","
+            << "\"B'<sub>g</sub>=10.0\",";
+            outfile << endl;
+    double bg_[8]={0,0.1,0.2,0.5,1.0,2.4,5.5,10.0};
+    for (double T = T1; T < T2 + 1.0e-6; T += dt)
+    {
+        outfile << setw(10) << T;
+        for (int k=0; k<8; k++)
+        {
+            mix.surfaceMassBalance(Yke.data(), Ykg.data(), T, P, bg_[k], Bc, hw,
                                Xw.data());
-        cout << setw(10) << T << setw(15) << Bc << setw(15) << hw / 1.0e6;
-        for (int i = 0; i < ns; ++i) cout << setw(25) << Xw[i];
-        cout << endl;
+                               outfile << setw(15) << Bc;
+        }
+        outfile << endl;
     }
+    outfile.close();
 }

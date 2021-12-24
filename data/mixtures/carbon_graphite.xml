@@ -1,0 +1,11 @@
+<mixture thermo_db="NASA-9" state_model="EquilTP" mechanism="none">
+
+<species> 
+C(gr) C O N NO O2 N2 C3 CO2 C2 CO CN </species>
+
+<element_compositions> 
+<composition name="Gas">    C:0.575, O:0.425, N:0.  </composition>
+<composition name="BLedge"> C:0., O:0.21, N:0.79  </composition> 
+<composition name="Char">   C:1., O:0., N:0.  </composition>
+</element_compositions> 
+</mixture>
