@@ -97,6 +97,10 @@ public:
         const std::string& name, double* const p_vec,
         Mutation::Thermodynamics::Composition::Type type =
             Mutation::Thermodynamics::Composition::MOLE) const;
+    bool getSpeciesComposition(
+        const std::string& name, double* const p_vec,
+        Mutation::Thermodynamics::Composition::Type type =
+            Mutation::Thermodynamics::Composition::MOLE) const;
 
 
 private:

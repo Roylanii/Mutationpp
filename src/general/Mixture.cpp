@@ -89,23 +89,26 @@ void Mixture::addComposition(const Composition& c, bool make_default)
 
     // If this composition has species names, then treat all as species and
     // convert to elements
-    if (!elements) {
-        ArrayXd svals(nSpecies());
-        ArrayXd evals(nElements());
-        c.getComposition(m_species_indices, svals.data());
 
-        if (c.type() == Composition::MASS)
-            convert<Y_TO_X>(svals.data(), svals.data());
-        convert<X_TO_XE>(svals.data(), evals.data());
+    //commit 2021.12.26
+    //Add species composition without converting to elements
+    // if (!elements) {
+    //     ArrayXd svals(nSpecies());
+    //     ArrayXd evals(nElements());
+    //     c.getComposition(m_species_indices, svals.data());
 
-        // Get list of element names
-        std::vector<std::string> names;
-        for (int i = 0; i < nElements(); ++i)
-            names.push_back(elementName(i));
+    //     if (c.type() == Composition::MASS)
+    //         convert<Y_TO_X>(svals.data(), svals.data());
+    //     convert<X_TO_XE>(svals.data(), evals.data());
 
-        m_compositions.push_back(
-            Composition(names, evals.data(), Composition::MOLE));
-    } else
+    //     // Get list of element names
+    //     std::vector<std::string> names;
+    //     for (int i = 0; i < nElements(); ++i)
+    //         names.push_back(elementName(i));
+
+    //     m_compositions.push_back(
+    //         Composition(names, evals.data(), Composition::MOLE));
+    // } else
         m_compositions.push_back(c);
 
     if (make_default)
@@ -127,6 +130,34 @@ bool Mixture::getComposition(
 
     // Get the composition
     m_compositions[i].getComposition(m_element_indices, p_vec);
+
+    // Convert if necessary
+    if (m_compositions[i].type() != type) {
+        if (type == Composition::MOLE)
+            convert<YE_TO_XE>(p_vec, p_vec);
+        else
+            convert<XE_TO_YE>(p_vec, p_vec);
+    }
+
+    return true;
+}
+
+bool Mixture::getSpeciesComposition(
+    const std::string& name, double* const p_vec, Composition::Type type) const
+{
+    int i = 0;
+    for ( ; i < m_compositions.size(); ++i)
+    {
+        if (m_compositions[i].name() == name) break;
+    }
+        
+
+    // Check if there is a composition with the given name
+    if (i == m_compositions.size())
+        return false;
+
+    // Get the composition
+    m_compositions[i].getComposition(m_species_indices, p_vec);
 
     // Convert if necessary
     if (m_compositions[i].type() != type) {

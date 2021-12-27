@@ -7,6 +7,8 @@
 
 using namespace Mutation;
 using namespace Eigen;
+using namespace Mutation::Thermodynamics;
+using namespace Mutation::Utilities;
 void getOptLong(int argc, char *argv[], std::map<int, std::string> &input)
 {
     int opt;              // getopt_long() 的返回值
@@ -69,8 +71,8 @@ int main(int argc, char *argv[])
     Mutation::GlobalOptions::dataDirectory(input.dataDirectory());
     MixtureOptions opts(input.mixturename());
     Mixture mix(opts);
-    double P_init = input.pressureinit();
-    double T_init = input.temperatureinit();
+    const double P_init = input.pressureinit();
+    const double T_init = input.temperatureinit();
     // Setting number of iterations for the solver
     mix.setIterationsSurfaceBalance(input.maxstepinit());
     mix.setIterationsPert_m(input.pertminit());
@@ -93,7 +95,8 @@ int main(int argc, char *argv[])
     // Mass gradient
     VectorXd xi_e(ns);
     xi_e = Map<const VectorXd>(mix.X(), ns);
-    double dx = input.distanceinit();
+    // mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
+    const double dx = input.distanceinit();
     mix.setDiffusionModel(xi_e.data(), dx);
 
     // Temperature gradient
@@ -158,6 +161,13 @@ int main(int argc, char *argv[])
     VectorXd v_hi_rhoi_vi = VectorXd::Zero(nT);
     v_hi_rhoi_vi(pos_T_trans) = -v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
 
+    //solid conduction
+    MixtureOptions graphiteopt("graphite.xml");
+    Mixture graphite(graphiteopt);
+    const int set_state_PT = 1;
+    graphite.setState(&P_init,&T_s[0],1);
+    double hcp=graphite.mixtureHMass(T_s[0]);
+
     // Building balance functions
     VectorXd F(ns);
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
@@ -192,26 +202,45 @@ int main(int argc, char *argv[])
     std::cout << std::setw(28) << mblow;
     std::cout << std::endl;
 
-    std::cout << "Surface species property" << std::endl;
-    std::cout << setw(24) << "";
+    std::cout << "Surface mass properties" << std::endl;
+    std::cout << setw(30) << "";
     for (int j = 0; j < ns; ++j)
-        std::cout << std::setw(13) << mix.speciesName(j);
+        std::cout << std::setw(16) << mix.speciesName(j);
     std::cout << std::endl;
 
     //species density
-    std::cout << setw(24) << "Species density[kg/m^3]";
+    std::cout << setw(30) << "Species density[kg/m^3]";
     for (int j = 0; j < ns; ++j)
-        std::cout << std::setw(13) << rhoi_s(j);
+        std::cout << std::setw(16) << rhoi_s(j);
     std::cout << std::endl;
-    std::cout << setw(24) << "Species mole fraction";
+    //chemical source
+    std::cout << setw(30) << "Chemical production[kg/m^2-s]";
+    for (int j = 0; j < ns; ++j)
+        std::cout << std::setw(16) << wdot(j);
+    std::cout << std::endl;
+    std::cout << setw(30) << "Surface species mole fraction";
     for (int j = 0; j < mix.nSpecies(); ++j)
-        std::cout << std::setw(13) << mix.X()[j];
+        std::cout << std::setw(16) << mix.X()[j];
+    std::cout << std::endl;
+    std::cout << setw(30) << "Edge species mole fraction";
+    for (int j = 0; j < mix.nSpecies(); ++j)
+        std::cout << std::setw(16) << xi_e[j];
     std::cout << std::endl;
 
-    //chemical source
-    std::cout << setw(24) << "Chemical mass[kg/m^2-s]";
-    for (int j = 0; j < ns; ++j)
-        std::cout << std::setw(13) << wdot(j);
+    cout.precision(4);
+    //设定后续以科学计数法的方式输出浮点数
+    cout.setf(ios::scientific);
+
+    std::cout << "Surface energy properties" << std::endl;
+    std::cout << std::setw(24) << "Conductive heat[J]";
+    std::cout << std::setw(24) << "Radiative heat[J]";
+    std::cout << std::setw(24) << "Blowing heat[J]";
+    std::cout << std::setw(24) << "Diffusion heat[J]";
+    std::cout << std::endl;
+    std::cout << std::setw(12) << (-lambda.cwiseProduct(dTdx));
+    std::cout << std::setw(12) << (-q_srad); 
+    std::cout << std::setw(12) << (mblow * v_h); 
+    std::cout << std::setw(12) << (-v_hi_rhoi_vi);
     std::cout << std::endl;
 
 #if 0
