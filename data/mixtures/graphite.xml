@@ -1,0 +1,15 @@
+<!-- Neutral 5 species air mixture -->
+<mixture mechanism="none"
+         thermo_db="NASA-9"
+         state_model="Equil"
+         gsi_mechanism="none">
+
+    <species>
+        C(gr)
+    </species>
+
+    <element_compositions default="Char">
+        <composition name="Char"> C:1.0 </composition>
+    </element_compositions>
+
+</mixture>
