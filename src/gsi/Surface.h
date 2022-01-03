@@ -173,7 +173,8 @@ public:
     }
 
 //==============================================================================
-
+// added by zhangjingchao
+// These virtual function are added to prevent calling from surface object
     /**
      * Purely virtual function to be called to change the number of
      * iterations performed in the surface balance.
@@ -234,6 +235,14 @@ public:
         // << "the surface energy balance!";
         std::cout << "WARNING! setIterationsPert_T can be called only when \
         solving the surface energy balance! This setting is inactive!";
+    }
+
+    virtual double computeGasFourierHeatFlux(
+        const Eigen::VectorXd &v_T)
+    {
+        throw LogicError()
+            << "computeGasFourierHeatFlux can be called only when solving "
+            << "the surface energy balance!";
     }
 
 //==============================================================================

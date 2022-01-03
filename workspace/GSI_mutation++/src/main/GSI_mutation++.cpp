@@ -94,8 +94,8 @@ int main(int argc, char *argv[])
 
     // Mass gradient
     VectorXd xi_e(ns);
-    xi_e = Map<const VectorXd>(mix.X(), ns);
-    // mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
+    // xi_e = Map<const VectorXd>(mix.X(), ns);
+    mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
     const double dx = input.distanceinit();
     mix.setDiffusionModel(xi_e.data(), dx);
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     // physical cell
     VectorXd rhoi_s(ns);
     mix.densities(rhoi_s.data());
-    VectorXd T_s = VectorXd::Constant(nT, 1800.);
+    VectorXd T_s = VectorXd::Constant(nT, (T_init / 2.0));
     mix.setSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
 
     // Solve balance and request solution
@@ -135,6 +135,7 @@ int main(int argc, char *argv[])
     {
         dTdx = (T_s - T_e) / dx;
         mix.frozenThermalConductivityVector(lambda.data());
+        // std::cout<<mix.computeGasFourierHeatFlux(T_s.data());
     }
 
     // Get surface production rates
@@ -165,8 +166,8 @@ int main(int argc, char *argv[])
     MixtureOptions graphiteopt("graphite.xml");
     Mixture graphite(graphiteopt);
     const int set_state_PT = 1;
-    graphite.setState(&P_init,&T_s[0],1);
-    double hcp=graphite.mixtureHMass(T_s[0]);
+    graphite.setState(&P_init, &T_s[0], 1);
+    double hcp = graphite.mixtureHMass(T_s[0]);
 
     // Building balance functions
     VectorXd F(ns);
@@ -237,25 +238,14 @@ int main(int argc, char *argv[])
     std::cout << std::setw(24) << "Blowing heat[J]";
     std::cout << std::setw(24) << "Diffusion heat[J]";
     std::cout << std::endl;
-    std::cout << std::setw(12) << (-lambda.cwiseProduct(dTdx));
-    std::cout << std::setw(12) << (-q_srad); 
-    std::cout << std::setw(12) << (mblow * v_h); 
-    std::cout << std::setw(12) << (-v_hi_rhoi_vi);
-    std::cout << std::endl;
+    for (int j = 0; j < nT; ++j)
+    {
+        std::cout << std::setw(24) << (-lambda(j)*(dTdx(j)));
+        std::cout << std::setw(24) << (-q_srad(j));
+        std::cout << std::setw(24) << (mblow * v_h(j));
+        std::cout << std::setw(24) << (-v_hi_rhoi_vi(j));
+        std::cout << std::endl;
+    }
 
-#if 0
-        //read input from argv
-    // std::map<int, std::string> input;
-    // getOptLong(argc, argv, input);
-    // std::map<int, std::string>::iterator map_iter;
-    // map_iter = input.find(0);
-    // if (map_iter != input.end())
-    //     Mutation::GlobalOptions::workingDirectory(map_iter->second);
-    // map_iter = input.find(1);
-    // MixtureOptions opts(map_iter->second.c_str());
-    // map_iter = input.find(2);
-    // double P_init = stod(map_iter->second);
-    // map_iter = input.find(3);
-    // double T_init = stod(map_iter->second);
-#endif
+
 }

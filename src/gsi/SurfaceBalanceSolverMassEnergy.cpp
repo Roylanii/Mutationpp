@@ -227,6 +227,8 @@ public:
     }
 
 //==============================================================================
+// These function are added by zhangjingchao
+// to change set interation options directly through mixture object 
 
     void setIterationsSurfaceBalance(const int& iter){ setMaxIterations(iter); }
 
@@ -236,14 +238,13 @@ public:
 
     void setIterationsEps(const double& eps){ setEpsilon(eps); }
 
-    void setIterationsPert_m(const double& pert_m)
-    {
-        m_pert_m=pert_m;
-    }
+    void setIterationsPert_m(const double& pert_m){m_pert_m=pert_m;}
     
-    void setIterationsPert_T(const double& pert_T)
+    void setIterationsPert_T(const double& pert_T){m_pert_T=pert_T;}
+
+    double computeGasFourierHeatFlux(const Eigen::VectorXd& v_T)
     {
-        m_pert_T=pert_T;
+        return mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_T);
     }
 
 //==============================================================================

@@ -142,6 +142,8 @@ bool Mixture::getComposition(
     return true;
 }
 
+// added by zhangjingchao
+// species composition getter
 bool Mixture::getSpeciesComposition(
     const std::string& name, double* const p_vec, Composition::Type type) const
 {
@@ -154,7 +156,9 @@ bool Mixture::getSpeciesComposition(
 
     // Check if there is a composition with the given name
     if (i == m_compositions.size())
-        return false;
+        throw InvalidInputError("composition", name)
+                    << "Composition did not found in mixture composition "
+                    << "species composition does not found.";
 
     // Get the composition
     m_compositions[i].getComposition(m_species_indices, p_vec);

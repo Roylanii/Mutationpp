@@ -1,6 +1,6 @@
 <mixture mechanism="none"
          thermo_db="NASA-9"
-         state_model="ChemNonEq1T"
+         state_model="ChemNonEqTTv"
 	 gsi_mechanism="seb_carbon_ablation_catalysis">
 
     <species>

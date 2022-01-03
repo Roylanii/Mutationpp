@@ -97,6 +97,15 @@ public:
         const std::string& name, double* const p_vec,
         Mutation::Thermodynamics::Composition::Type type =
             Mutation::Thermodynamics::Composition::MOLE) const;
+
+    // added by zhangjingchao
+    // species composition getter
+    /*
+     ** @brief read species composition list
+     ** when no type is given, coposition::mole is given by default
+     ** @param name composition name
+     ** @param p_vec composition vector on return
+     */
     bool getSpeciesComposition(
         const std::string& name, double* const p_vec,
         Mutation::Thermodynamics::Composition::Type type =

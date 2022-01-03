@@ -202,6 +202,7 @@ void GasSurfaceInteraction::solveSurfaceBalance()
 }
 
 //==============================================================================
+// added by zhangjingchao
 
 void GasSurfaceInteraction::setIterationsSurfaceBalance(const int& iter)
 {
@@ -236,6 +237,11 @@ void GasSurfaceInteraction::setIterationsPert_m(const double& pert_m)
 void GasSurfaceInteraction::setIterationsPert_T(const double& pert_T)
 {
     mp_surf->setIterationsPert_T(pert_T);
+}
+
+double GasSurfaceInteraction::computeGasFourierHeatFlux(const double* const v_T) {
+    return mp_surf->computeGasFourierHeatFlux(Map<const VectorXd>(
+        v_T, m_thermo.nEnergyEqns()));
 }
 
 //==============================================================================

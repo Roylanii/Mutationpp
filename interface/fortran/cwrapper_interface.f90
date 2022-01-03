@@ -129,6 +129,19 @@ module mutationpp
         
         real(kind=8) function mpp_electron_thermal_diffusion_ratios()
         end function
+
+        ! added by zhangjingchao
+        ! integer function mpp_loadintfromfile(input_file,argc)
+        ! character(len=*) :: input_file,argc
+        ! end function
+
+        ! real(kind=8) function mpp_loaddoublefromfile(input_file,argc)
+        ! character(len=*) :: input_file,argc
+        ! end function
+
+        real(kind=8) function mpp_getsurfaceradiativeheatflux()
+        end function
+
     end interface
 
 end module mutationpp

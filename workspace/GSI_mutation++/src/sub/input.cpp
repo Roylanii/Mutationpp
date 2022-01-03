@@ -197,10 +197,6 @@ void Input::loadFromXmlElement(IO::XmlElement &element)
         element.parseError(
             "XmlElement is not of 'input' type!");
 
-    IO::XmlElement::const_iterator iter;
-    for (iter = element.begin(); iter != element.end(); ++iter)
-    {
-    }
 
     element.getAttribute<std::string>("data_directory", m_data_directory, m_data_directory);
 

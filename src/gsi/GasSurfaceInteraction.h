@@ -166,6 +166,10 @@ public:
      */
     void solveSurfaceBalance();
 
+    //===========================================================================
+    // add by zhangjingchao
+
+    double computeGasFourierHeatFlux(const double* const v_T);
     /**
      * Function which allows to change the number of iterations when solving
      * the surface balance at the interface. The default value is 5.
@@ -201,6 +205,8 @@ public:
      *
     **/
     void setIterationsPert_T(const double& pert_T);
+
+    //========================================================================
 
     /**
      * Function which return the total mass blowing flux.

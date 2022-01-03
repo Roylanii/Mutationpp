@@ -34,6 +34,7 @@
 
 #define F_STRING char*
 #define F_STRLEN long int
+#define F_STRDOU double
 
 #ifdef __cplusplus
 extern "C" {
@@ -515,6 +516,50 @@ void NAME_MANGLE(convert_ye_to_xe)(
 
 void NAME_MANGLE(convert_ys_to_ye)(
         const double* species_y, double* elements_y);
+
+//================================================================================
+// added by zhangjingchao
+void NAME_MANGLE(initializegsi)(
+    F_STRING mixture, F_STRLEN mixture_length);
+
+void NAME_MANGLE(globaloptionsworkingdir)(
+    F_STRING workingdir, F_STRLEN workingdir_length);
+
+void NAME_MANGLE(getworkingdir)(
+    F_STRING workingdir, F_STRLEN sorkingdir_length);
+
+void NAME_MANGLE(loadstringfromfile)(
+    F_STRING m_input_file, F_STRING m_argc, F_STRING m_argv,
+    F_STRLEN input_length, F_STRLEN argc_length, F_STRLEN argv_length);
+
+void NAME_MANGLE(loadintfromfile)(
+    F_STRING m_input_file, F_STRING m_argc, int *value,
+    F_STRLEN input_length, F_STRLEN argc_length);
+
+void NAME_MANGLE(loaddoublefromfile)(
+    F_STRING m_input_file, F_STRING m_argc, double *value,
+    F_STRLEN input_length, F_STRLEN argc_length);
+
+void NAME_MANGLE(setiterationssurfacebalance)(int *iters);
+
+void NAME_MANGLE(setiterationspert_m)(double *pert_m);
+
+void NAME_MANGLE(setiterationspert_t)(double *pert_T);
+
+void NAME_MANGLE(setiterationseps)(double *tol);
+
+double NAME_MANGLE(getsurfaceradiativeheatflux)();
+
+void NAME_MANGLE(setiterationshistory)(F_STRING iof, F_STRLEN iof_length);
+
+void NAME_MANGLE(equilibrate)(double *T, double *P);
+
+void NAME_MANGLE(get_gsi_mechism)(F_STRING mechanism, F_STRLEN mechanism_length);
+
+void NAME_MANGLE(compute_gas_heat_flux)(double *v_T, double* heat_T);
+
+void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN comp_length);
+//====================================================================================
 
 #ifdef __cplusplus
 }

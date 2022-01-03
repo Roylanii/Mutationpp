@@ -1,6 +1,6 @@
 <input
 	#data_directory="/home/zhangjc/gitee/Mutation/Mutationpp/data"
-	working_directory="data"
+	working_directory="/D/gitee/Mutation/Mutationpp/workspace/GSI_mutation++/data"
 	#mixture_name="seb_oxidation_NASA9_ChemNonEq1T"
 	#mixture_name="smb_catalysis_ele"
 	#mixture_name="seb_carbon_ablation"
@@ -12,5 +12,5 @@
 	pert_m="1e-12"
 	pert_T="1e-8"
 	tolerance="1e-20"
-	iNewtonhistory="true">
+	iNewtonhistory="1true">
 </input>
