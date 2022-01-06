@@ -19,7 +19,7 @@ end module nrtype
 module input
     use nrtype
     implicit none
-    character(len=99) ::m_input_file, m_data_directory, m_working_directory, m_mixture_name, m_iNewtonhistory
+    character(len=99) ::m_input_file, m_data_directory, m_working_directory, m_mixture_name, m_iNewtonhistory, m_gsi_mechism
     integer(I4B) :: m_maxstep
     real(kind=8) :: m_pressure_init, m_temperature_init, m_distance , m_pert_m, m_pert_T, m_tol
 
@@ -30,7 +30,7 @@ subroutine setDefaultInput
     implicit none 
     m_input_file="input.xml"
     m_data_directory=""
-    !m_working_directory="/D/gitee/Mutation/Mutationpp/workspace/GSI_mutation++/data"
+    m_working_directory="/D/gitee/Mutation/Mutationpp/workspace/GSI_mutation++/data"
     m_working_directory=""
     m_mixture_name = ""
     m_pressure_init = 101325;
@@ -47,7 +47,8 @@ subroutine setInput
     use input
     implicit none
     call setDefaultInput
-    call mpp_loadstringfromfile(m_input_file,"data_directory",m_data_directory)
+    !data directory can be set automaticly
+    !call mpp_loadstringfromfile(m_input_file,"data_directory",m_data_directory)
     call mpp_loadstringfromfile(m_input_file,"working_directory",m_working_directory)
     call mpp_loadstringfromfile(m_input_file,"mixture_name",m_mixture_name)
     call mpp_loadstringfromfile(m_input_file,"iNewtonhistory",m_iNewtonhistory)

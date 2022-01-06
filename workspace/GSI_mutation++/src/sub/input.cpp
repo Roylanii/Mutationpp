@@ -1,4 +1,5 @@
 #include "input.h"
+#include <getopt.h>
 using namespace std;
 using namespace Mutation::Utilities;
 Input::Input()
@@ -237,4 +238,53 @@ void Input::loadFromXmlElement(IO::XmlElement &element)
     //     else if (iter->tag() == "element_compositions")
     //         loadElementCompositions(*iter);
     // }
+}
+
+void getOptLong(int argc, char *argv[], std::map<int, std::string> &input)
+{
+    int opt;              // getopt_long() 的返回值
+    int digit_optind = 0; // 设置短参数类型及是否需要参数
+
+    int option_index = 0;
+    // 设置短参数类型及是否需要参数
+    const char *optstring = "a";
+    /*
+    struct option {
+             const char * name;  // 参数的名称
+             int has_arg; // 是否带参数值，有三种：no_argument， required_argument，optional_argument
+             int * flag; // 为空时，函数直接将 val 的数值从getopt_long的返回值返回出去，
+                         当非空时，val的值会被赋到 flag 指向的整型数中，而函数返回值为0
+             int val; // 用于指定函数找到该选项时的返回值，或者当flag非空时指定flag指向的数据的值
+        };
+     */
+    static struct option long_options[] = {
+        {"workdir", required_argument, NULL, 'a'},
+        {"mixture", required_argument, NULL, 'b'},
+        {"pressure", required_argument, NULL, 'c'},
+        {"temperature", required_argument, NULL, 'd'},
+        {0, 0, 0, 0} // 添加 {0, 0, 0, 0} 是为了防止输入空值
+    };
+
+    while ((opt = getopt_long(argc,
+                              argv,
+                              optstring,
+                              long_options,
+                              &option_index)) != -1)
+    {
+
+        // printf("opt = %c\n", opt);                           // 命令参数，亦即 -a -b -n -r
+        // printf("optarg = %s\n", optarg);                     // 参数内容
+        // printf("optind = %d\n", optind);                     // 下一个被处理的下标值
+        // printf("argv[optind - 1] = %s\n", argv[optind - 1]); // 参数内容
+        // printf("option_index = %d\n", option_index);         // 当前打印参数的下标值
+        // printf("\n");
+        if (opt == 'a')
+            input.insert(std::pair<int, std::string>(0, optarg));
+        else if (opt == 'b')
+            input.insert(std::pair<int, std::string>(1, optarg));
+        else if (opt == 'c')
+            input.insert(std::pair<int, std::string>(2, optarg));
+        else if (opt == 'd')
+            input.insert(std::pair<int, std::string>(3, optarg));
+    }
 }

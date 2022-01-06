@@ -2,7 +2,6 @@ program main
     use mutationpp
     use input
     implicit none
-    character(len=35) :: gsi_mechism
     integer(IP) :: i, j, ne, ns, nt, neq, set_state_with_rhoi_T, pos_T_trans
 
     real(RP) :: T, P, rho, E, mblow
@@ -14,23 +13,26 @@ program main
     pos_T_trans = 1
 
     call setInput
+
     call MPP_globaloptionsworkingdir(m_working_directory)
     call mpp_initializegsi(m_mixture_name)
+
+    !set solver options
     call mpp_setiterationssurfacebalance(m_maxstep)
     call mpp_setiterationspert_m(m_pert_m)
     call mpp_setiterationspert_t(m_pert_T)
     call mpp_setiterationseps(m_tol)
     call mpp_setiterationshistory(m_iNewtonhistory)
+    call mpp_get_gsi_mechism(m_gsi_mechism)
 
     ns = mpp_nspecies()
     nt = mpp_n_energy_eqns()
     ne = mpp_nelements()
-    call mpp_get_gsi_mechism(gsi_mechism)
     neq = ns + nt
 
     allocate (xi_e(ns), rhoi_s(ns), xi_s(ns), dxidx(ns), vdi(ns), wdot(ns), Residual(neq))
     allocate (T_e(nt), T_s(nt))
-    if (gsi_mechism == "phenomenological_mass_energy") then
+    if (m_gsi_mechism == "phenomenological_mass_energy") then
         allocate (dtdx(nt), lambda(nt), q_srad(nt))
     end if
     allocate (v_hi(ns*nt), v_h(nt), v_hi_rhoi_vi(nt))
@@ -50,7 +52,7 @@ program main
 
     !set heat gradient if needed
     T_e = m_temperature_init
-    if (gsi_mechism == "phenomenological_mass_energy") then
+    if (m_gsi_mechism == "phenomenological_mass_energy") then
         call mpp_set_cond_heat_flux(T_e, m_distance)
     end if
 
@@ -74,7 +76,7 @@ program main
     call mpp_stefan_maxwell(dxidx, vdi, E)
 
     ! compute heat flux
-    if (gsi_mechism == "phenomenological_mass_energy") then
+    if (m_gsi_mechism == "phenomenological_mass_energy") then
         dtdx = (T_s - T_e)/m_distance
         call mpp_frozen_thermal_conductivity(lambda)
         !gas heat flux can be calculated by (-lambda*dtdx) or function below
@@ -86,13 +88,14 @@ program main
     call mpp_surface_production_rates(wdot)
 
     ! Blowing flux (should be zero for catalysis)
-    call mpp_mass_blowing_rate(mblow); 
+    call mpp_mass_blowing_rate(mblow)
+
     ! Species and mixture enthalpies
     call mpp_species_h_mass(v_hi)
     v_h(pos_T_trans) = DOT_PRODUCT(rhoi_s(1:ns)/rho, v_hi(1:ns))
 
     ! Surface radiation
-    if (gsi_mechism == "phenomenological_mass_energy") then
+    if (m_gsi_mechism == "phenomenological_mass_energy") then
         q_srad = 0.0
         q_srad(pos_T_trans) = mpp_getsurfaceradiativeheatflux()
     end if
@@ -109,7 +112,7 @@ program main
 
     ! Building balance functions
     Residual(1:ns) = (rhoi_s/rho)*mblow + (rhoi_s*vdi) - wdot; 
-    if (gsi_mechism == "phenomenological_mass_energy") then
+    if (m_gsi_mechism == "phenomenological_mass_energy") then
         Residual(ns + 1:neq) = -lambda*dtdx - q_srad + mblow*v_h - v_hi_rhoi_vi
     end if
 
@@ -167,11 +170,12 @@ program main
 
     deallocate (xi_e, rhoi_s, xi_s, dxidx, vdi, wdot, Residual)
     deallocate (T_e, T_s)
-    if (gsi_mechism == "phenomenological_mass_energy") then
+    if (m_gsi_mechism == "phenomenological_mass_energy") then
         deallocate (dtdx, lambda, q_srad)
     end if
     deallocate (v_hi, v_h, v_hi_rhoi_vi)
     deallocate (species_name)
+    call mpp_destroy()
 101 format(1X, F18.7)
 
 end program

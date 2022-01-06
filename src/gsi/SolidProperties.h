@@ -91,6 +91,21 @@ public:
      * equal to the one set in the gsi input file.
      */
     virtual double getEnthalpyVirginMaterial() const { return 0.; }
+
+//==============================================================================
+
+    /**
+     *  added by zhangjingchao
+     * 
+     *
+     * Virtual function which returns error.
+     */   
+    double getSteadyStateHeat() const 
+    {
+        throw LogicError()
+            << "getSteadyStateHeat can be called only when solving "
+            << "the Solid Properties Steady State!";
+    }
 };
 
     } // namespace GasSurfaceInteraction

@@ -79,6 +79,21 @@ public:
      */
     double getEnthalpyVirginMaterial() const { return m_h_v; }
 
+//==============================================================================
+
+    /**added by zhangjinhcao
+     * @brief compute solid conduction heat flux using the steaty state assumptin.
+     * F_b = -q_cond -F_r-F_g
+     *      = -u_r(rho_v*h_v-rho_s*h_s)-u_r(rho_s*h_s)-u_r(rho_p*h_r)
+     * when pyrolysis is not considered
+     * F_b = -u_r(rho_v*h_v)
+     *     = -mblow/rho_s*(rho_v*h_v)
+     *     = -mblow*(rho_v/rho_s)*h_v
+     *     = -mblow*(m_phi+1.0)*m_h_v
+     * Returns the solid conduction heat (m_phi+1)*m_h_v
+     */
+    virtual double getSteadyStateHeat() const { return (m_phi+1.0)*m_h_v; }
+
 private:
     double m_phi;
     double m_h_v;

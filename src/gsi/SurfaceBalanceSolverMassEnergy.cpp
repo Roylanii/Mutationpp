@@ -290,6 +290,10 @@ public:
             mv_surf_reac_rates);
         mv_f.head(m_ns) += mv_rhoi*mass_blow/mv_rhoi.sum();
 
+        // Solid conduction heat flux
+        double solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+        mv_f(pos_E) += solid_heat;  
+
         // Energy
         m_thermo.getEnthalpiesMass(mv_hi.data());
         double hmix = m_thermo.mixtureHMass();

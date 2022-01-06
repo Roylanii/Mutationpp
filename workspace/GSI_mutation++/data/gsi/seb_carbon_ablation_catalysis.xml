@@ -7,7 +7,7 @@
 
     <solid_properties
         virgin_to_surf_density_ratio = "1."
-        enthalpy_virgin = "0."
+        enthalpy_virgin = "1.0e5"
     />
 
     <surface_features

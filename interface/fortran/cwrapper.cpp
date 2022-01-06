@@ -558,7 +558,7 @@ void NAME_MANGLE(loadstringfromfile)(
         element.parseError(
             "XmlElement is not of 'input' type!");
 
-    element.getAttribute<std::string>(char_to_string(m_argc, argc_length), m_string, m_string);
+    element.getAttribute<std::string>(char_to_string(m_argc, argc_length), m_string, m_argc);
     string_to_char(m_string, m_argv, argv_length);
 }
 
@@ -573,7 +573,7 @@ void NAME_MANGLE(loadintfromfile)(
         element.parseError(
             "XmlElement is not of 'input' type!");
 
-    element.getAttribute<int>(char_to_string(m_argc, argc_length), *value);
+    element.getAttribute<int>(char_to_string(m_argc, argc_length), *value, m_argc);
 }
 
 void NAME_MANGLE(loaddoublefromfile)(
@@ -587,7 +587,7 @@ void NAME_MANGLE(loaddoublefromfile)(
         element.parseError(
             "XmlElement is not of 'input' type!");
 
-    element.getAttribute<double>(char_to_string(m_argc, argc_length), *value);
+    element.getAttribute<double>(char_to_string(m_argc, argc_length), *value, m_argc);
 }
 
 void NAME_MANGLE(setiterationssurfacebalance)(int *iters)
