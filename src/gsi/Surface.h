@@ -245,6 +245,13 @@ public:
             << "the surface energy balance!";
     }
 
+    virtual double computeSolidHeat()
+    {
+        throw LogicError()
+            << "computeSolidHeat can be called only when solving "
+            << "the surface energy balance!";
+    }
+
 //==============================================================================
 
     /**

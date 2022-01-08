@@ -206,6 +206,10 @@ public:
     **/
     void setIterationsPert_T(const double& pert_T);
 
+    double computeSolidHeat();
+
+    //added by zhangjingchao, end
+
     //========================================================================
 
     /**

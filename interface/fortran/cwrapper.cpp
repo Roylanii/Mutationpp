@@ -641,3 +641,8 @@ void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN c
 {
     p_mix->getSpeciesComposition(char_to_string(comp,comp_length),p_vec,Composition::MOLE);
 }
+
+double NAME_MANGLE(get_solid_heat)()
+{
+    return p_mix->computeSolidHeat();
+}

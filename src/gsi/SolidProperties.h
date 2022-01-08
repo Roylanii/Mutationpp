@@ -82,7 +82,7 @@ public:
      * Virtual function which returns parameter phi defined as the ratio
      * between the virgin material density and the surface density minus 1.
      */
-    virtual double getPhiRatio() const { return 1.; }
+    virtual double getPhiRatio() const { return 1.0; }
 
 //==============================================================================
 
@@ -90,7 +90,7 @@ public:
      * Virtual function which returns the enthalpy of the virgin material
      * equal to the one set in the gsi input file.
      */
-    virtual double getEnthalpyVirginMaterial() const { return 0.; }
+    virtual double getEnthalpyVirginMaterial() const { return 0.0; }
 
 //==============================================================================
 
@@ -100,12 +100,7 @@ public:
      *
      * Virtual function which returns error.
      */   
-    double getSteadyStateHeat() const 
-    {
-        throw LogicError()
-            << "getSteadyStateHeat can be called only when solving "
-            << "the Solid Properties Steady State!";
-    }
+    virtual double getSteadyStateHeat() const { return 0.0; }
 };
 
     } // namespace GasSurfaceInteraction

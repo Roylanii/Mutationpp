@@ -364,8 +364,8 @@ public:
 //==============================================================================
 
     double norm() {
-        return mv_dX.lpNorm<Eigen::Infinity>();
-        // return mv_f.lpNorm<Eigen::Infinity>();
+        //return mv_dX.lpNorm<Eigen::Infinity>();
+        return mv_f.lpNorm<Eigen::Infinity>();
     }
 
 //==============================================================================

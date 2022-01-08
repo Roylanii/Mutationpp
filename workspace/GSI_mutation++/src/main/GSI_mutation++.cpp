@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
 
     // Mass gradient
     VectorXd xi_e(ns);
-    // xi_e = Map<const VectorXd>(mix.X(), ns);
-    mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
+    xi_e = Map<const VectorXd>(mix.X(), ns);
+    // mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
     const double dx = input.distanceinit();
     mix.setDiffusionModel(xi_e.data(), dx);
 
@@ -115,15 +115,17 @@ int main(int argc, char *argv[])
     v_hi_rhoi_vi(pos_T_trans) = -v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
 
     //solid conduction
-    MixtureOptions graphiteopt("graphite.xml");
-    Mixture graphite(graphiteopt);
-    const int set_state_PT = 1;
-    // graphite.setState(&P_init, &T_s[0], 1);
-    const double P1=1000.0;
-    const double T1=300.0;
-    graphite.setState(&P1, &T1, 1);
-    double hcp = graphite.mixtureHMass(T1);
-    std::cout << "hcp=" << hcp <<std::endl;
+    double solid_conduction;
+    solid_conduction = mix.computeSolidHeat();
+    // MixtureOptions graphiteopt("graphite.xml");
+    // Mixture graphite(graphiteopt);
+    // const int set_state_PT = 1;
+    // // graphite.setState(&P_init, &T_s[0], 1);
+    // const double P1=1000.0;
+    // const double T1=300.0;
+    // graphite.setState(&P1, &T1, 1);
+    // double hcp = graphite.mixtureHMass(T1);
+    // std::cout << "hcp=" << hcp <<std::endl;
 
     // Building balance functions
     VectorXd F(ns);
@@ -132,7 +134,7 @@ int main(int argc, char *argv[])
     F.head(ns) = (rhoi_s / rho) * mblow + rhoi_s.cwiseProduct(vdi) - wdot;
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
         F.tail(nT) = -lambda.cwiseProduct(dTdx) - q_srad + mblow * v_h -
-                     v_hi_rhoi_vi;
+                     v_hi_rhoi_vi + solid_conduction;
 
     // Compute error and write
     //double err = F.lpNorm<Infinity>();
@@ -189,17 +191,19 @@ int main(int argc, char *argv[])
     cout.setf(ios::scientific);
 
     std::cout << "Surface energy properties" << std::endl;
-    std::cout << std::setw(24) << "Conductive heat[J]";
-    std::cout << std::setw(24) << "Radiative heat[J]";
-    std::cout << std::setw(24) << "Blowing heat[J]";
-    std::cout << std::setw(24) << "Diffusion heat[J]";
+    std::cout << std::setw(22) << "Gas conductive heat[J]";
+    std::cout << std::setw(18) << "Radiative heat[J]";
+    std::cout << std::setw(18) << "Blowing heat[J]";
+    std::cout << std::setw(18) << "Diffusion heat[J]";
+    std::cout << std::setw(26) << "Solid conductive heat[J]";
     std::cout << std::endl;
     for (int j = 0; j < nT; ++j)
     {
-        std::cout << std::setw(24) << (-lambda(j)*(dTdx(j)));
-        std::cout << std::setw(24) << (-q_srad(j));
-        std::cout << std::setw(24) << (mblow * v_h(j));
-        std::cout << std::setw(24) << (-v_hi_rhoi_vi(j));
+        std::cout << std::setw(22) << (-lambda(j)*(dTdx(j)));
+        std::cout << std::setw(18) << (-q_srad(j));
+        std::cout << std::setw(18) << (mblow * v_h(j));
+        std::cout << std::setw(18) << (-v_hi_rhoi_vi(j));
+        std::cout << std::setw(26) << (mblow * solid_conduction);
         std::cout << std::endl;
     }
 

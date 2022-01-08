@@ -244,6 +244,11 @@ double GasSurfaceInteraction::computeGasFourierHeatFlux(const double* const v_T)
         v_T, m_thermo.nEnergyEqns()));
 }
 
+double GasSurfaceInteraction::computeSolidHeat()
+{
+    return mp_surf_state->solidProps().getSteadyStateHeat();
+}
+
 //==============================================================================
 
 void GasSurfaceInteraction::getMassBlowingRate(double& mdot){

@@ -3,14 +3,14 @@
 	working_directory="/D/gitee/Mutation/Mutationpp/workspace/GSI_mutation++/data"
 	#mixture_name="seb_oxidation_NASA9_ChemNonEq1T"
 	#mixture_name="smb_catalysis_ele"
-	#mixture_name="seb_carbon_ablation"
-	mixture_name="seb_carbon_ablation_catalysis"
+	mixture_name="seb_carbon_ablation"
+	#mixture_name="seb_carbon_ablation_catalysis"
 	pressure_init="10000"
-	temperature_init="5000"
+	temperature_init="3000"
 	distance="1e-3"
 	maxstep="500"
 	pert_m="1e-12"
 	pert_T="1e-8"
-	tolerance="1e-20"
-	iNewtonhistory="1true">
+	tolerance="1e-15"
+	iNewtonhistory="true">
 </input>

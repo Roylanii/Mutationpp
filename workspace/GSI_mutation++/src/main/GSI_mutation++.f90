@@ -2,12 +2,13 @@ program main
     use mutationpp
     use input
     implicit none
-    integer(IP) :: i, j, ne, ns, nt, neq, set_state_with_rhoi_T, pos_T_trans
+    integer(kind=4) :: i, j, ne, ns, nt, neq
+    integer (IP) :: set_state_with_rhoi_T, pos_T_trans
 
-    real(RP) :: T, P, rho, E, mblow
+    real(kind=8) :: T, P, rho, E, mblow, solid_heat
     character(len=12), allocatable, DIMENSION(:) :: species_name
     real(RP), dimension(:), allocatable :: rhoi_s, wdot, xi_s, xi_e, mwi, dxidx, vdi, v_hi, v_h
-    real(RP), dimension(:), allocatable :: T_e, T_s, dtdx, lambda, q_srad, v_hi_rhoi_vi, Residual
+    real(RP), dimension(:), allocatable :: T_e, T_s, dtdx, lambda, q_srad, q_gcon, v_hi_rhoi_vi, Residual
 
     set_state_with_rhoi_T = 1
     pos_T_trans = 1
@@ -30,10 +31,10 @@ program main
     ne = mpp_nelements()
     neq = ns + nt
 
-    allocate (xi_e(ns), rhoi_s(ns), xi_s(ns), dxidx(ns), vdi(ns), wdot(ns), Residual(neq))
+    allocate (xi_e(ns), rhoi_s(ns), xi_s(ns), dxidx(ns), vdi(ns), wdot(ns), Residual(ns+1))
     allocate (T_e(nt), T_s(nt))
     if (m_gsi_mechism == "phenomenological_mass_energy") then
-        allocate (dtdx(nt), lambda(nt), q_srad(nt))
+        allocate (dtdx(nt), lambda(nt), q_srad(nt), q_gcon(nt))
     end if
     allocate (v_hi(ns*nt), v_h(nt), v_hi_rhoi_vi(nt))
     allocate (species_name(ns))
@@ -77,10 +78,11 @@ program main
 
     ! compute heat flux
     if (m_gsi_mechism == "phenomenological_mass_energy") then
-        dtdx = (T_s - T_e)/m_distance
-        call mpp_frozen_thermal_conductivity(lambda)
-        !gas heat flux can be calculated by (-lambda*dtdx) or function below
-        !call mpp_compute_gas_heat_flux(T_s,dtdx)
+        !dtdx = (T_s - T_e)/m_distance
+        !call mpp_frozen_thermal_conductivity(lambda)
+        !q_gcon = lambda*dtdx
+        !gas heat flux can be calculated by (-lambda*dtdx=q_gcon>0) or function below, just for validation
+        call mpp_compute_gas_heat_flux(T_s,q_gcon)
     end if
 
     ! Get surface production rates
@@ -101,9 +103,10 @@ program main
     end if
 
     ! Chemical Energy Contribution
-    v_hi_rhoi_vi(pos_T_trans) = dot_product((-v_hi(1:ns)), (rhoi_s*vdi))
+    v_hi_rhoi_vi(pos_T_trans) = dot_product((v_hi(1:ns)), (rhoi_s*vdi))
 
     ! solid conduction
+    solid_heat=mblow*mpp_get_solid_heat()
     ! MixtureOptions graphiteopt("graphite.xml");
     ! Mixture graphite(graphiteopt);
     ! const int set_state_PT = 1;
@@ -113,7 +116,7 @@ program main
     ! Building balance functions
     Residual(1:ns) = (rhoi_s/rho)*mblow + (rhoi_s*vdi) - wdot; 
     if (m_gsi_mechism == "phenomenological_mass_energy") then
-        Residual(ns + 1:neq) = -lambda*dtdx - q_srad + mblow*v_h - v_hi_rhoi_vi
+        Residual(ns + 1) = sum(q_gcon) - q_srad(pos_T_trans) + mblow*v_h(pos_T_trans) + v_hi_rhoi_vi(pos_T_trans) + solid_heat
     end if
 
     ! write results
@@ -163,15 +166,15 @@ program main
     write (*, *)
 
     write (*, *) "Surface energy properties"
-    write (*, "(4A25)") "Conductive heat[J]", "Radiative heat[J]", "Blowing heat[J]", "Diffusion heat[J]"
-    write (*, "(4E25.7)", advance='no') - lambda(pos_T_trans)*dtdx(pos_T_trans), -q_srad(pos_T_trans), &
-        mblow*v_h(pos_T_trans), -v_hi_rhoi_vi(pos_T_trans)
+    write (*, "(5A25)") "Conductive heat[J]", "Radiative heat[J]", "Blowing heat[J]", "Diffusion heat[J]", "Solid heat(J)"
+    write (*, "(5E25.7)", advance='no') sum(q_gcon), -q_srad(pos_T_trans) , &
+    mblow*v_h(pos_T_trans), v_hi_rhoi_vi(pos_T_trans), solid_heat
     write (*, *)
 
     deallocate (xi_e, rhoi_s, xi_s, dxidx, vdi, wdot, Residual)
     deallocate (T_e, T_s)
     if (m_gsi_mechism == "phenomenological_mass_energy") then
-        deallocate (dtdx, lambda, q_srad)
+        deallocate (dtdx, lambda, q_srad, q_gcon)
     end if
     deallocate (v_hi, v_h, v_hi_rhoi_vi)
     deallocate (species_name)

@@ -92,7 +92,7 @@ public:
      *     = -mblow*(m_phi+1.0)*m_h_v
      * Returns the solid conduction heat (m_phi+1)*m_h_v
      */
-    virtual double getSteadyStateHeat() const { return (m_phi+1.0)*m_h_v; }
+    double getSteadyStateHeat() const { return (m_phi+1.0)*m_h_v; }
 
 private:
     double m_phi;

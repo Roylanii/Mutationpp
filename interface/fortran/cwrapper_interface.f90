@@ -142,6 +142,9 @@ module mutationpp
         real(kind=8) function mpp_getsurfaceradiativeheatflux()
         end function
 
+        real(kind=8) function mpp_get_solid_heat()
+        end function
+
     end interface
 
 end module mutationpp
