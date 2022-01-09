@@ -1,6 +1,8 @@
 # Build directories
 build/
 install/
+obj_c
+obj_f
 
 # Documentation
 docs/tests.h
@@ -18,6 +20,7 @@ docs/html/
 *.pyc
 _skbuild/
 *.whl
+*.mod
 
 # OS specifics
 .DS_Store

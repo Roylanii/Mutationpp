@@ -21,7 +21,7 @@ module input
     implicit none
     character(len=99) ::m_input_file, m_data_directory, m_working_directory, m_mixture_name, m_iNewtonhistory, m_gsi_mechism
     integer(I4B) :: m_maxstep
-    real(kind=8) :: m_pressure_init, m_temperature_init, m_distance , m_pert_m, m_pert_T, m_tol
+    real(DP) :: m_pressure_init, m_temperature_init, m_distance , m_pert_m, m_pert_T, m_tol
 
 end module input
 

@@ -7,10 +7,10 @@
 	#mixture_name="seb_carbon_ablation_catalysis"
 	pressure_init="10000"
 	temperature_init="3000"
-	distance="1e-3"
+	distance="1e-5"
 	maxstep="500"
-	pert_m="1e-12"
-	pert_T="1e-8"
-	tolerance="1e-15"
+	pert_m="1e-20"
+	pert_T="1e-12"
+	tolerance="1e-25"
 	iNewtonhistory="true">
 </input>
