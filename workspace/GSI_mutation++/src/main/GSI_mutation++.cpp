@@ -115,8 +115,8 @@ int main(int argc, char *argv[])
     v_hi_rhoi_vi(pos_T_trans) = -v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
 
     //solid conduction
-    double solid_conduction;
-    solid_conduction = mix.computeSolidHeat();
+    VectorXd solid_conduction(nT);
+    solid_conduction(pos_T_trans) = mix.computeSolidHeat();
     // MixtureOptions graphiteopt("graphite.xml");
     // Mixture graphite(graphiteopt);
     // const int set_state_PT = 1;
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
         std::cout << std::setw(18) << (-q_srad(j));
         std::cout << std::setw(18) << (mblow * v_h(j));
         std::cout << std::setw(18) << (-v_hi_rhoi_vi(j));
-        std::cout << std::setw(26) << (mblow * solid_conduction);
+        std::cout << std::setw(26) << (mblow * solid_conduction(j));
         std::cout << std::endl;
     }
 
