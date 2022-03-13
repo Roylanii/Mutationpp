@@ -20,8 +20,8 @@ module input
     use nrtype
     implicit none
     character(len=99) ::m_input_file, m_data_directory, m_working_directory, m_mixture_name, m_iNewtonhistory, m_gsi_mechism
-    integer(I4B) :: m_maxstep
-    real(DP) :: m_pressure_init, m_temperature_init, m_distance , m_pert_m, m_pert_T, m_tol
+    integer(I4B) :: m_maxiteration, m_subiteration
+    real(DP) :: m_pressure_init, m_temperature_init, m_distance , m_pert_m, m_pert_T, m_eps
 
 end module input
 
@@ -36,10 +36,11 @@ subroutine setDefaultInput
     m_pressure_init = 101325;
     m_temperature_init = 3000;
     m_distance = 1e-3
-    m_maxstep = 100
+    m_maxiteration = 50
+    m_subiteration = 5
     m_pert_m = 1e-2
     m_pert_T = 1.0
-    m_tol = 1.0e-12
+    m_eps = 1.0e-12
     m_iNewtonhistory = "false"
 end subroutine
 
@@ -52,13 +53,14 @@ subroutine setInput
     call mpp_loadstringfromfile(m_input_file,"working_directory",m_working_directory)
     call mpp_loadstringfromfile(m_input_file,"mixture_name",m_mixture_name)
     call mpp_loadstringfromfile(m_input_file,"iNewtonhistory",m_iNewtonhistory)
-    call mpp_loadintfromfile(m_input_file,"maxstep",m_maxstep)
+    call mpp_loadintfromfile(m_input_file,"maxiterations",m_maxiteration)
+    call mpp_loadintfromfile(m_input_file,"subiterations",m_subiteration)
     call mpp_loaddoublefromfile(m_input_file,"pressure_init",m_pressure_init)
     call mpp_loaddoublefromfile(m_input_file,"temperature_init",m_temperature_init)
     call mpp_loaddoublefromfile(m_input_file,"distance",m_distance)
     call mpp_loaddoublefromfile(m_input_file,"pert_m",m_pert_m)
     call mpp_loaddoublefromfile(m_input_file,"pert_T",m_pert_T)
-    call mpp_loaddoublefromfile(m_input_file,"tolerance",m_tol)
+    call mpp_loaddoublefromfile(m_input_file,"resnorm",m_eps)
     
 
 endsubroutine

@@ -41,7 +41,9 @@ namespace Mutation {
 DiffusionVelocityCalculator::DiffusionVelocityCalculator(
     const Mutation::Thermodynamics::Thermodynamics& thermo,
     Mutation::Transport::Transport& transport)
-        : mv_dxidx(thermo.nSpecies()),
+        : m_ns(thermo.nSpecies()),
+          m_nT(thermo.nEnergyEqns()),
+          mv_dxidx(thermo.nSpecies()),
           mv_mole_frac_edge(thermo.nSpecies()),
           m_transport(transport),
           m_dx(0.),
@@ -88,6 +90,52 @@ void DiffusionVelocityCalculator::computeDiffusionVelocities(
         mv_dxidx.data(),
         v_diff_velocities.data(),
         electric_field);
+}
+
+Eigen::MatrixXd DiffusionVelocityCalculator::computeDiffusionVelocitiesJacobian(
+    const VectorXd& v_mole_frac, const double& pert_m, const double& pert_T)
+{
+    if (!m_is_diff_set) {
+    	throw LogicError()
+        << "Calling DiffusionVelocityCalculator::computeDrivingForces() before "
+        << "calling DiffusionVelocityCalculator::setDiffusionCalculator().";
+    }
+    MatrixXd mm_jacobian(m_ns,m_ns+m_nT);
+    VectorXd v_x=v_mole_frac;
+    VectorXd v_f_unpert(m_ns);
+    VectorXd v_f(m_ns);
+    mv_dxidx = (v_mole_frac - mv_mole_frac_edge)/m_dx;
+
+    double electric_field = 0.E0;
+    m_transport.stefanMaxwell(
+        mv_dxidx.data(),
+        v_f_unpert.data(),
+        electric_field);
+    
+    for (int i_s=0; i_s<m_ns;++i_s)
+    {
+        v_x=v_mole_frac;
+        v_x(i_s) += pert_m;
+        mv_dxidx = (v_x - mv_mole_frac_edge)/m_dx;
+        m_transport.stefanMaxwell(
+            mv_dxidx.data(),
+            v_f.data(),
+            electric_field);
+        mm_jacobian.col(i_s) = (v_f-v_f_unpert)/pert_m;
+    }
+
+    for (int i_T=0; i_T<m_nT; ++i_T)
+    {
+        mv_dxidx = (v_mole_frac - mv_mole_frac_edge)/m_dx;
+        m_transport.stefanMaxwell(
+            mv_dxidx.data(),
+            v_f.data(),
+            electric_field,
+            pert_T);
+        mm_jacobian.col(m_ns+i_T) = (v_f-v_f_unpert)/pert_T;
+    }
+    return mm_jacobian;
+    
 }
 
     } // namespace GasSurfaceInteraction

@@ -74,7 +74,7 @@ public:
           mv_f(m_neqns),
           mv_f_unpert(m_neqns),
           m_jac(m_neqns, m_neqns),
-          m_tol(1.e-12),
+          m_tol(1.e-15),
           m_pert_m(1.e-2),
           m_pert_T(1.e0),
           pos_E(m_ns),
@@ -121,7 +121,8 @@ public:
 
         // Setup NewtonSolver
         setMaxIterations(5);
-        setWriteConvergenceHistory(true);
+        setSubIterations(5);
+        setWriteConvergenceHistory(false);
         setEpsilon(m_tol);
     }
 
@@ -145,6 +146,15 @@ public:
         v_surf_reac_rates.setZero();
         if (mp_surf_chem != NULL)
             mp_surf_chem->surfaceReactionRates(v_surf_reac_rates);
+    }
+
+    void computeSurfaceReactionRatesJacobian(Eigen::MatrixXd& m_surf_reac_rates_jacobian)
+    {
+        errorSurfaceStateNotSet();
+
+        m_surf_reac_rates_jacobian.setZero();
+        if (mp_surf_chem != NULL)
+            mp_surf_chem->surfaceReactionRatesJacobian(m_surf_reac_rates_jacobian);
     }
 
 //=============================================================================
@@ -183,6 +193,10 @@ public:
     void setGasFourierHeatFluxModel(
         const Eigen::VectorXd& v_T_edge, const double& dx){
         mp_gas_heat_flux_calc->setGasFourierHeatFluxModel(v_T_edge, dx);
+    }
+
+    void setGasFourierHeatFluxModel(const double& constHeat){
+        mp_gas_heat_flux_calc->setGasFourierHeatFluxModel(constHeat);
     }
 
 //=============================================================================
@@ -226,11 +240,96 @@ public:
             mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
     }
 
+    void solveSurfaceBalanceNewJacobian()
+    {
+        // stop grinding away at yourself!
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_X.tail(m_nT) = m_surf_state.getSurfaceT();
+
+        // Impose equilibrium
+        if (is_surf_in_thermal_eq)
+            mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
+
+        saveUnperturbedPressure(mv_rhoi, mv_X.tail(m_nT));
+
+        // Changing to the solution variables
+        computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
+        applyTolerance(mv_X);
+
+        // Solving
+        mv_X = solve_newJacobian(mv_X);
+
+        applyTolerance(mv_X);
+        computePartialDensfromMoleFrac(
+            mv_X.head(m_ns), mv_X.tail(m_nT), mv_rhoi);
+
+        // Setting the state again
+        m_surf_state.setSurfaceState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+    }
+
+    //=============================================================================
+
+    void solveSurfaceBalance_ri()
+    {
+        // use partial species density and temperature as indepedent variables  
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_X.tail(m_nT) = m_surf_state.getSurfaceT();
+        mv_X.head(m_ns) = mv_rhoi;
+
+        // Impose equilibrium
+        if (is_surf_in_thermal_eq)
+            mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
+
+        saveUnperturbedPressure(mv_rhoi, mv_X.tail(m_nT));
+
+        // Changing to the solution variables
+        // computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
+        applyTolerance(mv_rhoi);
+
+        // Solving
+        mv_X = solve_ri(mv_X);
+
+        applyTolerance(mv_X);
+        // computePartialDensfromMoleFrac(mv_X.head(m_ns), mv_X.tail(m_nT), mv_rhoi);
+
+        // Setting the state again
+        m_surf_state.setSurfaceState(
+            mv_X.head(m_ns).data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+    }
+
+
 //==============================================================================
 // These function are added by zhangjingchao
 // to change set interation options directly through mixture object 
 
+    void reducePert(){
+        m_pert_m /= 1.2;
+        m_pert_T /= 1.2;
+    }
+    void reducePert2(){
+        m_pert_m /= 10.0;
+        m_pert_T /= 10.0;
+    }
+    void increasePert(){
+        m_pert_m *= 1.2;
+        m_pert_T *= 1.2;
+    }
+    void outJac(){
+        std::cout << "Resnorm too high, Jacobian=" <<std::endl<< m_jac<<std::endl;
+    }
+
     void setIterationsSurfaceBalance(const int& iter){ setMaxIterations(iter); }
+
+    void setSubIterationsSurfaceBalance(const int& iter){ setSubIterations(iter); }
 
     double getSurfaceRadiativeHeatFlux() {return mp_surf_rad->surfaceNetRadiativeHeatFlux();}
 
@@ -245,6 +344,10 @@ public:
     double computeGasFourierHeatFlux(const Eigen::VectorXd& v_T)
     {
         return mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_T);
+    }
+    double computeGasFourierHeatFlux()
+    {
+        return mp_gas_heat_flux_calc->computeGasFourierHeatFlux();
     }
 
 //==============================================================================
@@ -304,6 +407,59 @@ public:
             mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
         mv_f(pos_E) += hmix*mass_blow;
 
+
+        // Radiation
+        if (mp_surf_rad != NULL)
+            mv_f(pos_E) -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+    }
+
+
+    void updateFunction_ri(Eigen::VectorXd& v_X)
+    {
+        applyTolerance(v_X);
+        // Comment: (+) If flux enters the volume.
+        // Assuming the normal vector of the surface to be pointing from the
+        // solid to the gas phase.
+        mv_f.setZero();
+
+    	// Setting Initial Gas and Surface State;
+        computeMoleFracfromPartialDens(v_X.head(m_ns),v_X.tail(m_nT),mv_rhoi);
+
+        m_thermo.setState(
+            v_X.head(m_ns).data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        m_surf_state.setSurfaceState(
+            v_X.head(m_ns).data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+
+        // Diffusion Fluxes
+        mp_diff_vel_calc->computeDiffusionVelocities(
+            mv_rhoi, mv_Vdiff);
+        applyTolerance(mv_Vdiff);
+        mv_f.head(m_ns) += v_X.head(m_ns).cwiseProduct(mv_Vdiff);
+
+        // Chemical Production Rates
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        mv_f.head(m_ns) -= mv_surf_reac_rates;
+
+        // Blowing flux
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+        mv_f.head(m_ns) += v_X.head(m_ns)*mass_blow/v_X.head(m_ns).sum();
+
+        // Solid conduction heat flux
+        double solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+        mv_f(pos_E) += solid_heat;  
+
+        // Energy
+        m_thermo.getEnthalpiesMass(mv_hi.data());
+        double hmix = m_thermo.mixtureHMass();
+
+        mv_f(pos_E) +=
+           mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(v_X.head(m_ns)));
+        mv_f(pos_E) +=
+            mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
+        mv_f(pos_E) += hmix*mass_blow;
+
+
         // Radiation
         if (mp_surf_rad != NULL)
             mv_f(pos_E) -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
@@ -329,6 +485,112 @@ public:
             v_X(i_ns) = X_unpert;
         }
 
+        // Perturbing Energy ! multipe temperarure is not considered
+        double T_pert = m_pert_T;
+        double X_unpert = v_X(pos_E);
+        v_X(pos_E) += T_pert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+
+        updateFunction(v_X);
+        m_jac.col(pos_E) = (mv_f-mv_f_unpert) / T_pert;
+        v_X(pos_E) = X_unpert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+    }
+
+    void updateJacobianResolve(Eigen::VectorXd& v_X, const int& iter)
+    {
+        // Perturbing Mass
+        mv_f_unpert = mv_f;
+        for (int i_ns = 0; i_ns < m_ns; i_ns++){
+            double X_unpert = v_X(i_ns);
+            double pert = m_pert_m/(pow(10,iter));
+            v_X(i_ns) += pert;
+
+            updateFunction(v_X);
+
+            // Update Jacobian column
+            m_jac.col(i_ns) = (mv_f-mv_f_unpert) / pert;
+
+            // Unperturb mole fractions
+            v_X(i_ns) = X_unpert;
+        }
+
+        // Perturbing Energy ! multipe temperarure is not considered
+        double T_pert = m_pert_T/(pow(10,iter));
+        double X_unpert = v_X(pos_E);
+        v_X(pos_E) += T_pert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+
+        updateFunction(v_X);
+        m_jac.col(pos_E) = (mv_f-mv_f_unpert) / T_pert;
+        v_X(pos_E) = X_unpert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+    }
+
+    void updateJacobian_ri(Eigen::VectorXd& v_X)
+    {
+        // Perturbing Mass
+        mv_f_unpert = mv_f;
+        for (int i_ns = 0; i_ns < m_ns; i_ns++){
+            double X_unpert = v_X(i_ns);
+            double pert = m_pert_m;
+            v_X(i_ns) += pert;
+
+            updateFunction_ri(v_X);
+
+            // Update Jacobian column
+            m_jac.col(i_ns) = (mv_f-mv_f_unpert) / pert;
+
+            // Unperturb mole fractions
+            v_X(i_ns) = X_unpert;
+        }
+
+        // Perturbing Energy
+        double T_pert = m_pert_T;
+        double X_unpert = v_X(pos_E);
+        v_X(pos_E) += T_pert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+
+        updateFunction_ri(v_X);
+        m_jac.col(pos_E) = (mv_f-mv_f_unpert) / T_pert;
+
+        v_X(pos_E) = X_unpert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+    }
+
+    //update energy jacobian
+
+    void updateEnergyJacobianResolve(Eigen::VectorXd& v_X, const int& iter)
+    {
+        mv_f_unpert = mv_f;
+        // Perturbing Energy
+        double T_pert = m_pert_T/pow(10,iter);
+        double X_unpert = v_X(pos_E);
+        v_X(pos_E) += T_pert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+
+        updateFunction(v_X);
+        m_jac.col(pos_E) = (mv_f-mv_f_unpert) / T_pert;
+
+        v_X(pos_E) = X_unpert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+    }
+    void resetJacobian()
+    {
+       m_jac.setConstant(0.0);
+    }
+
+    void updateEnergyJacobian(Eigen::VectorXd& v_X)
+    {
+        mv_f_unpert = mv_f;
         // Perturbing Energy
         double T_pert = m_pert_T;
         double X_unpert = v_X(pos_E);
@@ -343,6 +605,202 @@ public:
         if (is_surf_in_thermal_eq)
             v_X.tail(m_nT-1).setConstant(v_X(pos_E));
     }
+
+    void updateEnergyJacobian_ri(Eigen::VectorXd& v_X)
+    {
+        mv_f_unpert = mv_f;
+        // Perturbing Energy
+        double T_pert = m_pert_T;
+        double X_unpert = v_X(pos_E);
+        v_X(pos_E) += T_pert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+
+        updateFunction_ri(v_X);
+        m_jac.col(pos_E) = (mv_f-mv_f_unpert) / T_pert;
+
+        v_X(pos_E) = X_unpert;
+        if (is_surf_in_thermal_eq)
+            v_X.tail(m_nT-1).setConstant(v_X(pos_E));
+    }
+
+    Eigen::MatrixXd dYidXj(Eigen::VectorXd& v_X)
+    {
+        Eigen::MatrixXd dydx(m_ns,m_ns+m_nT);
+        dydx.setZero();
+        
+        for (int i_r=0;i_r<m_ns;++i_r)
+        {
+            for(int i_c=0;i_c<m_ns;++i_c)
+            {
+                if (i_r == i_c)
+                {
+                    dydx(i_r,i_c)= m_thermo.speciesMw(i_r)/m_thermo.mixtureMw()*(1-mv_rhoi(i_r)/mv_rhoi.sum());
+                }
+                else
+                {
+                    dydx(i_r,i_c)= m_thermo.speciesMw(i_c)/m_thermo.mixtureMw()*(-mv_rhoi(i_r)/mv_rhoi.sum());
+                }
+            }
+        }
+        return dydx;
+
+    }
+
+    Eigen::MatrixXd drdXj(Eigen::VectorXd& v_X)
+    {
+        Eigen::MatrixXd drdx(m_ns,m_ns+m_nT);
+        drdx.setZero();
+        for (int i_r=0;i_r<m_ns;++i_r)
+        {
+            drdx.col(i_r).setConstant(mv_rhoi(i_r)/v_X(i_r));
+        }
+        return drdx;
+
+    }
+
+    void massJacobian(Eigen::VectorXd v_X)
+    {
+        m_jac.setZero();
+        const double pert_m = m_pert_m;
+        const double pert_T = m_pert_T;
+        //initial surface state
+        computePartialDensfromMoleFrac(
+            v_X.head(m_ns), v_X.tail(m_nT), mv_rhoi);
+        m_thermo.setState(
+            mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        m_surf_state.setSurfaceState(
+            mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+
+        //surface reaction rates
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+        Eigen::MatrixXd chem_jac(m_ns,m_ns+m_nT);
+        computeSurfaceReactionRatesJacobian(chem_jac);
+
+        // YiM jacobian
+        m_jac.topLeftCorner(m_ns, m_ns+m_nT) += dYidXj(v_X)*mass_blow;
+        
+        for (int i_r=0;i_r<m_ns;++i_r)
+        {
+            double Yi = mv_rhoi(i_r)/mv_rhoi.sum();
+            for (int i_c=0;i_c<m_ns+m_nT;++i_c)
+            {
+                m_jac(i_r,i_c) +=  Yi * chem_jac.col(i_c).sum();
+            }
+        }
+
+        //  Diffusion terms jacobian
+        Eigen::MatrixXd diffus_jac(m_ns,m_ns+m_nT);
+        mp_diff_vel_calc->computeDiffusionVelocities(
+            mv_rhoi, mv_Vdiff);
+        diffus_jac = mp_diff_vel_calc->computeDiffusionVelocitiesJacobian(
+            v_X.head(m_ns), pert_m, pert_T);
+
+        for (int i_r=0;i_r < m_ns; ++i_r)
+        {
+            for (int i_c=0; i_c < m_ns; ++i_c)
+            {
+                m_jac(i_r,i_c) += (mv_rhoi.sum()*m_thermo.speciesMw(i_c)/m_thermo.mixtureMw())*mv_Vdiff(i_r);
+            }
+            
+        }
+
+        m_jac.topLeftCorner(m_ns, m_ns+m_nT) += diffus_jac*mv_rhoi.sum();
+
+        //chemical reaction jacobian
+        m_jac.topLeftCorner(m_ns, m_ns+m_nT) -= chem_jac;
+
+        //energy jacobian
+        Eigen::VectorXd v_xi = v_X;
+        double Residual_unpert=0.0;
+        double Residual=0.0;
+        
+
+        double solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+        Residual_unpert += solid_heat;  
+
+        // Energy
+        m_thermo.getEnthalpiesMass(mv_hi.data());
+        double hmix = m_thermo.mixtureHMass();
+
+        Residual_unpert +=
+           mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(v_X.head(m_ns)));
+        Residual_unpert +=
+            mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
+        Residual_unpert += hmix*mass_blow;
+        // Radiation
+        if (mp_surf_rad != NULL)
+            Residual_unpert -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+        for (int i_r=0;i_r<m_ns;++i_r)
+        {
+            v_xi = v_X;
+            v_xi(i_r) = v_X(i_r) + pert_m;
+            computePartialDensfromMoleFrac(
+                v_xi.head(m_ns), v_xi.tail(m_nT), mv_rhoi);
+            m_thermo.setState(
+                mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+            m_surf_state.setSurfaceState(
+                mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+            
+            computeSurfaceReactionRates(mv_surf_reac_rates);
+            mass_blow = mp_mass_blowing_rate->computeBlowingFlux(mv_surf_reac_rates);
+            solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+            Residual += solid_heat;  
+
+            // Energy
+            m_thermo.getEnthalpiesMass(mv_hi.data());
+            hmix = m_thermo.mixtureHMass();
+
+            Residual +=
+               mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(v_X.head(m_ns)));
+            Residual +=
+                mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
+            Residual += hmix*mass_blow;
+            // Radiation
+            if (mp_surf_rad != NULL)
+                Residual -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+            
+            m_jac(m_ns,i_r)=(Residual-Residual_unpert)/pert_m;
+        
+        }
+        for (int i_r=m_ns;i_r<m_ns+m_nT;++i_r)
+        {
+            v_xi = v_X;
+            v_xi(i_r) = v_X(i_r) + pert_T;
+            computePartialDensfromMoleFrac(
+                v_xi.head(m_ns), v_xi.tail(m_nT), mv_rhoi);
+            m_thermo.setState(
+                mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+            m_surf_state.setSurfaceState(
+                mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
+            
+            computeSurfaceReactionRates(mv_surf_reac_rates);
+            mass_blow = mp_mass_blowing_rate->computeBlowingFlux(mv_surf_reac_rates);
+            solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+            Residual += solid_heat;  
+
+            // Energy
+            m_thermo.getEnthalpiesMass(mv_hi.data());
+            hmix = m_thermo.mixtureHMass();
+
+            Residual +=
+               mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(v_X.head(m_ns)));
+            Residual +=
+                mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
+            Residual += hmix*mass_blow;
+            // Radiation
+            if (mp_surf_rad != NULL)
+                Residual -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+            
+            m_jac(m_ns,i_r)=(Residual-Residual_unpert)/pert_T;
+        
+        }
+
+    }
+
+
 
 //==============================================================================
 
@@ -366,6 +824,14 @@ public:
     double norm() {
         //return mv_dX.lpNorm<Eigen::Infinity>();
         return mv_f.lpNorm<Eigen::Infinity>();
+    }
+    double massnorm() {
+        //return mv_dX.lpNorm<Eigen::Infinity>();
+        return mv_f.head(m_ns).lpNorm<Eigen::Infinity>();
+    }
+    double energynorm() {
+        //return mv_dX.lpNorm<Eigen::Infinity>();
+        return mv_f(pos_E);
     }
 
 //==============================================================================

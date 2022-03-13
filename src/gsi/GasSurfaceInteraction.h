@@ -144,6 +144,8 @@ public:
     void setGasFourierHeatFluxModel(
         const double* const p_T_edge, const double& dx);
 
+    void setGasFourierHeatFluxModel(const double& constHeat);
+
     /*
      * Function for the energy balance at the surface. Works only when the
      * surface_feature gas radiation is on. Otherwise the Tenv can be imposed
@@ -170,11 +172,14 @@ public:
     // add by zhangjingchao
 
     double computeGasFourierHeatFlux(const double* const v_T);
+    double computeGasFourierHeatFlux();
     /**
      * Function which allows to change the number of iterations when solving
      * the surface balance at the interface. The default value is 5.
      */
     void setIterationsSurfaceBalance(const int& iter);
+
+    void setSubIterationsSurfaceBalance(const int& iter);
 
     double getSurfaceRadiativeHeatFlux();
 

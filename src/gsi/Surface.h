@@ -92,6 +92,15 @@ public:
 //==============================================================================
 
     /**
+     * Purely virtual function which returns the surface reaction rates Jacobian
+     * for all species in the gas mixture in the mole fraction and the temperature$.
+     */
+    virtual void computeSurfaceReactionRatesJacobian(
+        Eigen::MatrixXd& m_surf_chem_rates_jacobian) = 0;
+
+//==============================================================================
+
+    /**
      * Returns the reaction rates for all the surface reactions occuring or
      * an error if no surface reactions are considered.
      */
@@ -149,6 +158,12 @@ public:
         << "setConductiveHeatFluxModel can be called only when solving "
         << "the surface energy balance!";
     }
+    virtual void setGasFourierHeatFluxModel(const double& constHeat)
+    {
+        throw LogicError()
+        << "setGasFourierHeatFluxModel can be called only when solving "
+        << "the surface energy balance!";
+    }
 
 //==============================================================================
 
@@ -169,7 +184,7 @@ public:
     {
         throw LogicError()
         << "solveSurfaceBalance can be called only when solving "
-        << "the surface energy balance!";
+        << "the surface balance!";
     }
 
 //==============================================================================
@@ -183,7 +198,14 @@ public:
     {
         throw LogicError()
         << "setIterationsSurfaceBalance can be called only when solving "
-        << "the surface energy balance!";
+        << "the surface  balance!";
+    }
+
+    virtual void setSubIterationsSurfaceBalance(const int& iter)
+    {
+        throw LogicError()
+        << "setSubIterationsSurfaceBalance can be called only when solving "
+        << "the surface balance!";
     }
 
     virtual double getSurfaceRadiativeHeatFlux()
@@ -239,6 +261,13 @@ public:
 
     virtual double computeGasFourierHeatFlux(
         const Eigen::VectorXd &v_T)
+    {
+        throw LogicError()
+            << "computeGasFourierHeatFlux can be called only when solving "
+            << "the surface energy balance!";
+    }
+
+    virtual double computeGasFourierHeatFlux()
     {
         throw LogicError()
             << "computeGasFourierHeatFlux can be called only when solving "

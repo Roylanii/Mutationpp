@@ -72,6 +72,15 @@ public:
      */
     void surfaceReactionRates(Eigen::VectorXd& v_mass_chem_rate) const;
 
+    /**
+     * @brief computes the chemcial source jacobian for
+     *  the species mole fraction and the temperature.
+     * 
+     * @param v_mass_chem_rate_jacobian Matrix(m_ns,m_ns+m_nT)
+     */
+
+    void surfaceReactionRatesJacobian(Eigen::MatrixXd& v_mass_chem_rate_jacobian) const;
+
 //==============================================================================
     /**
      * Computes the chemical source terms per reaction in \f$kg/(m^2 s)\f$.

@@ -479,7 +479,9 @@ void NAME_MANGLE(set_diffusion_model)( double* xi_edge, double* dx );
  * Sets the temperature at a distance dx from the surface needed for
  * the surface energy balance.
  */
-void NAME_MANGLE(set_cond_heat_flux)(double* T_edge, double* dx);
+void NAME_MANGLE(set_heatmodel_t)(double* T_edge, double* dx);
+
+void NAME_MANGLE(set_heatmodel_q)(double* constHeat);
 
 /**
  * Requests the solution of the surface balances at a surface using the
@@ -542,6 +544,8 @@ void NAME_MANGLE(loaddoublefromfile)(
 
 void NAME_MANGLE(setiterationssurfacebalance)(int *iters);
 
+void NAME_MANGLE(setsubiterationssurfacebalance)(int *iters);
+
 void NAME_MANGLE(setiterationspert_m)(double *pert_m);
 
 void NAME_MANGLE(setiterationspert_t)(double *pert_T);
@@ -557,6 +561,7 @@ void NAME_MANGLE(equilibrate)(double *T, double *P);
 void NAME_MANGLE(get_gsi_mechism)(F_STRING mechanism, F_STRLEN mechanism_length);
 
 void NAME_MANGLE(compute_gas_heat_flux)(double *v_T, double* heat_T);
+void NAME_MANGLE(compute_gas_heat_const)(double *heat_T);
 
 void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN comp_length);
 

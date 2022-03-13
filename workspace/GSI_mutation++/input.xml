@@ -1,16 +1,18 @@
-<input
+<input 
 	#data_directory="/home/zhangjc/gitee/Mutation/Mutationpp/data"
 	working_directory="/D/gitee/Mutation/Mutationpp/workspace/GSI_mutation++/data"
 	#mixture_name="seb_oxidation_NASA9_ChemNonEq1T"
 	#mixture_name="smb_catalysis_ele"
-	mixture_name="seb_carbon_ablation"
+	#mixture_name="seb_carbon_ablation"
 	#mixture_name="seb_carbon_ablation_catalysis"
-	pressure_init="10000"
-	temperature_init="3000"
-	distance="1e-5"
-	maxstep="500"
-	pert_m="1e-20"
-	pert_T="1e-12"
-	tolerance="1e-25"
+	mixture_name="seb_carbon"
+	pressure_init="570.129783007185"
+	temperature_init="19700.65"
+	distance="6.765985042499212E-002"
+	maxiterations="20"
+	subiterations="4"
+	pert_m="1e-1"
+	pert_T="1e0"
+	resnorm="1e-5"
 	iNewtonhistory="true">
 </input>

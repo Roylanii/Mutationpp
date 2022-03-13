@@ -19,10 +19,11 @@ program main
     call mpp_initializegsi(m_mixture_name)
 
     !set solver options
-    call mpp_setiterationssurfacebalance(m_maxstep)
+    call mpp_setiterationssurfacebalance(m_maxiteration)
+    call mpp_setsubiterationssurfacebalance(m_subiteration)
     call mpp_setiterationspert_m(m_pert_m)
     call mpp_setiterationspert_t(m_pert_T)
-    call mpp_setiterationseps(m_tol)
+    call mpp_setiterationseps(m_eps)
     call mpp_setiterationshistory(m_iNewtonhistory)
     call mpp_get_gsi_mechism(m_gsi_mechism)
 
@@ -54,12 +55,12 @@ program main
     !set heat gradient if needed
     T_e = m_temperature_init
     if (m_gsi_mechism == "phenomenological_mass_energy") then
-        call mpp_set_cond_heat_flux(T_e, m_distance)
+        call mpp_set_heatmodel_t(T_e, m_distance)
     end if
 
     !Initial conditions of the surface are the ones in the first physical cell
     call mpp_species_densities(rhoi_s)
-    T_s = m_temperature_init/2.0
+    T_s = m_temperature_init
     call mpp_set_surface_state(rhoi_s, T_s, set_state_with_rhoi_T)
 
     ! Solve balance and request solution

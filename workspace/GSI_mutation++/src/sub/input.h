@@ -59,10 +59,14 @@ public:
     void distanceinit(const double &distance);
 
     /// Gets the init maxstep.
-    const int &maxstepinit();
+    const int &maxiterationsinit();
+
+    const int &subiterationsinit();
 
     /// Sets the init temperature.
-    void maxstepinit(const int &maxstep);
+    void maxiterationsinit(const int &maxstep);
+
+    void subiterationsinit(const int &substep);
 
     /// Gets the init increment species density.
     const double &pertminit();
@@ -130,7 +134,9 @@ private:
     double m_distance;
 
     ///Max step for Newton iteration
-    int m_maxstep;
+    int m_maxiteration;
+
+    int m_subiteration;
 
     ///increment for species density performs in Newton solver
     double m_pert_m;
@@ -139,7 +145,7 @@ private:
     double m_pert_T;
 
     ///Tolerance in Newton solver
-    double m_tol;
+    double m_eps;
 
     ///Whether write history in Newton solver
     std::string m_iNewtonhistory;

@@ -66,6 +66,7 @@ public:
      */
     void setGasFourierHeatFluxModel(
         const Eigen::VectorXd& v_T_edge, const double& dx);
+    void setGasFourierHeatFluxModel(const double& constHeat);
 
 //==============================================================================
     /*
@@ -77,8 +78,8 @@ public:
      * @param Surface temperatures
      *
      */
-    double computeGasFourierHeatFlux(
-        const Eigen::VectorXd& v_T);
+    double computeGasFourierHeatFlux(const Eigen::VectorXd& v_T);
+    double computeGasFourierHeatFlux();
 
 private:
     Mutation::Transport::Transport& m_transport;
@@ -89,6 +90,8 @@ private:
     Eigen::VectorXd mv_lambda;
 
     double m_dx;
+    double m_constHeat;
+    bool m_is_constHeat;
     bool m_is_cond_set;
 };
 

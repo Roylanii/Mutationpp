@@ -490,6 +490,12 @@ void Transport::stefanMaxwell(
     stefanMaxwell(m_thermo.T(), m_thermo.Te(), p_dp, p_V, E, order);
 }
 
+void Transport::stefanMaxwell(
+    const double* const p_dp, double* const p_V, double& E, double& dt, int order)
+{
+    stefanMaxwell((m_thermo.T()+dt), m_thermo.Te(), p_dp, p_V, E, order);
+}
+
 
 void Transport::stefanMaxwell(double Th, double Te,
     const double* const p_dp, double* const p_V, double& E, int order)

@@ -94,6 +94,10 @@ void SurfaceChemistry::surfaceReactionRates(VectorXd& v_mass_chem_rate) const {
     v_mass_chem_rate = mp_rate_manager->computeRates();
 }
 
+void SurfaceChemistry::surfaceReactionRatesJacobian(MatrixXd& m_mass_chem_rate_jacobian) const {
+    m_mass_chem_rate_jacobian = mp_rate_manager->computeRatesJacobian();
+}
+
 //==============================================================================
 
 void SurfaceChemistry::surfaceReactionRatesPerReaction(

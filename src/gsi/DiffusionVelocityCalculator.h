@@ -84,11 +84,18 @@ public:
         const Eigen::VectorXd& v_mole_frac,
         Eigen::VectorXd& v_diff_velocities);
 
+    Eigen::MatrixXd computeDiffusionVelocitiesJacobian(
+        const Eigen::VectorXd& v_mole_frac, const double& pert_m, const double& pert_T);
+
 private:
     Mutation::Transport::Transport& m_transport;
 
     Eigen::VectorXd mv_mole_frac_edge;
     Eigen::VectorXd mv_dxidx;
+    Eigen::MatrixXd mm_jacobian;
+
+    size_t m_ns;
+    size_t m_nT;
 
     double m_dx;
     bool m_is_diff_set;

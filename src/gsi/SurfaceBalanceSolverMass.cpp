@@ -95,6 +95,7 @@ public:
 
         // Setup NewtonSolver
         setMaxIterations(5);
+        setSubIterations(5);
         setWriteConvergenceHistory(false);
         setEpsilon(m_tol);
     }
@@ -117,6 +118,15 @@ public:
         v_surf_reac_rates.setZero();
         if (mp_surf_chem != NULL)
             mp_surf_chem->surfaceReactionRates(v_surf_reac_rates);
+    }
+
+    void computeSurfaceReactionRatesJacobian(Eigen::MatrixXd& m_surf_reac_rates_jacobian)
+    {
+        errorSurfaceStateNotSet();
+
+        m_surf_reac_rates_jacobian.setZero();
+        if (mp_surf_chem != NULL)
+            mp_surf_chem->surfaceReactionRatesJacobian(m_surf_reac_rates_jacobian);
     }
 
 //=============================================================================
@@ -185,6 +195,19 @@ public:
 
 //==============================================================================
 
+    void reducePert(){
+        m_pert /= 1.2;
+    }
+    void reducePert2(){
+        m_pert /= 10.0;
+    }
+    void increasePert(){
+        m_pert *= 1.2;
+    }
+    void outJac(){
+        std::cout << "Resnorm too high, Jacobian=" <<std::endl<< m_jac<<std::endl;
+    }
+    void setSubIterationsSurfaceBalance(const int& iter){ setSubIterations(iter); }
     void setIterationsSurfaceBalance(const int& iter){ setMaxIterations(iter); }
     void setIterationsHistory(const bool& iof){ setWriteConvergenceHistory(iof); }
     void setIterationsEps(const double& eps){ setEpsilon(eps); }
@@ -248,6 +271,63 @@ public:
         }
     }
 
+    void updateJacobianResolve(Eigen::VectorXd& v_mole_frac, int& iter)
+    {
+        mv_f_unpert = mv_f;
+        for (int i_ns = 0 ; i_ns < m_ns ; i_ns++){
+            mv_X_unpert = v_mole_frac;
+            double pert = m_pert/pow(10,iter);
+            v_mole_frac(i_ns) += pert;
+
+            updateFunction(v_mole_frac);
+
+            // Update Jacobian column
+            m_jac.col(i_ns) = (mv_f - mv_f_unpert) / pert;
+
+            // Unperturbed mole fractions
+            v_mole_frac = mv_X_unpert;
+        }
+    }
+    void resetJacobian()
+    {
+       m_jac.setConstant(0.0);
+    }
+    void updateEnergyJacobian(Eigen::VectorXd& v_mole_frac)
+    {
+        mv_f_unpert = mv_f;
+        for (int i_ns = 0 ; i_ns < m_ns ; i_ns++){
+            mv_X_unpert = v_mole_frac;
+            double pert = m_pert;
+            v_mole_frac(i_ns) += pert;
+
+            updateFunction(v_mole_frac);
+
+            // Update Jacobian column
+            m_jac.col(i_ns) = (mv_f - mv_f_unpert) / pert;
+
+            // Unperturbed mole fractions
+            v_mole_frac = mv_X_unpert;
+        }
+    }
+
+    void updateEnergyJacobianResolve(Eigen::VectorXd& v_mole_frac, int& iter)
+    {
+        mv_f_unpert = mv_f;
+        for (int i_ns = 0 ; i_ns < m_ns ; i_ns++){
+            mv_X_unpert = v_mole_frac;
+            double pert = m_pert/pow(10,iter);
+            v_mole_frac(i_ns) += pert;
+
+            updateFunction(v_mole_frac);
+
+            // Update Jacobian column
+            m_jac.col(i_ns) = (mv_f - mv_f_unpert) / pert;
+
+            // Unperturbed mole fractions
+            v_mole_frac = mv_X_unpert;
+        }
+    }
+
 //==============================================================================
 
     Eigen::VectorXd& systemSolution()
@@ -265,6 +345,14 @@ public:
     {
         // return mv_f_unpert.lpNorm<Eigen::Infinity>();
         return mv_dX.lpNorm<Eigen::Infinity>();
+    }
+    double massnorm() {
+        //return mv_dX.lpNorm<Eigen::Infinity>();
+        return mv_f.head(m_ns).lpNorm<Eigen::Infinity>();
+    }
+    double energynorm() {
+        //return mv_dX.lpNorm<Eigen::Infinity>();
+        return 0.0;
     }
 
 //==============================================================================

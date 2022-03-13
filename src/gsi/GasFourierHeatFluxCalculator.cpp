@@ -46,7 +46,9 @@ GasFourierHeatFluxCalculator::GasFourierHeatFluxCalculator(
           mv_lambda(thermo.nEnergyEqns()),
           m_transport(transport),
           m_dx(0.),
-          m_is_cond_set(false)
+          m_is_cond_set(false),
+          m_is_constHeat(false),
+          m_constHeat(0.0)
 { }
 
 //==============================================================================
@@ -68,6 +70,23 @@ void GasFourierHeatFluxCalculator::setGasFourierHeatFluxModel(
     }
     m_dx = dx;
 
+    m_is_constHeat = false;
+
+    m_is_cond_set = true;
+}
+
+void GasFourierHeatFluxCalculator::setGasFourierHeatFluxModel(const double& constHeat)
+{
+    if (constHeat <= 0. ) {
+    	throw LogicError()
+        << "Calling GasFourierHeatFluxCalculator::setGasFourierHeatFluxModel()"
+        << " with a heat flux less or equal to zero. The pharse m_is_constHeat should "
+        << "always be true.";
+    }
+    m_constHeat = constHeat;
+
+    m_is_constHeat = true;
+
     m_is_cond_set = true;
 }
 
@@ -83,10 +102,35 @@ double GasFourierHeatFluxCalculator::computeGasFourierHeatFlux(
         << "calling GasFourierHeatFluxCalculator::"
         << "setGasFourierHeatFluxModel().";
     }
+    if (m_is_constHeat) {
+        return m_constHeat;
+    }
+    else {
+        mv_dTdx = (v_T - mv_T_edge)/m_dx;
+        m_transport.frozenThermalConductivityVector(mv_lambda.data());
+        return -mv_lambda.dot(mv_dTdx);
+    }
 
-    mv_dTdx = (v_T - mv_T_edge)/m_dx;
-    m_transport.frozenThermalConductivityVector(mv_lambda.data());
-    return -mv_lambda.dot(mv_dTdx);
+    
+}
+double GasFourierHeatFluxCalculator::computeGasFourierHeatFlux()
+{
+    if (!m_is_cond_set) {
+    	throw LogicError()
+        << "Calling GasFourierHeatFluxCalculator::"
+        << "HeatFluxCalculator() before "
+        << "calling GasFourierHeatFluxCalculator::"
+        << "setGasFourierHeatFluxModel().";
+    }
+    if (m_is_constHeat) {
+        return m_constHeat;
+    }
+    else {
+        throw LogicError()
+        << "Calling computeGasFourierHeatFlux must set const Heat";
+    }
+
+    
 }
 
     } // namespace GasSurfaceInteraction

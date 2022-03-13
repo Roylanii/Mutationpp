@@ -135,6 +135,20 @@ void SurfaceState::setSurfaceT(const double* const p_T){
     mv_T = Eigen::Map<const Eigen::VectorXd>(p_T, m_nT);
 }
 
+void SurfaceState::setIterationsPert_m(const double& pert_m){
+        m_pert_m=pert_m;
+    }
+
+void SurfaceState::setIterationsPert_T(const double& pert_T){
+        m_pert_T=pert_T;
+    }
+const double& SurfaceState::getIterationsPert_m() const {
+        return m_pert_m;
+    }
+const double& SurfaceState::getIterationsPert_T() const {
+        return m_pert_T;
+}
+
 //==============================================================================
 
 void SurfaceState::setSolidProperties(
@@ -142,6 +156,25 @@ void SurfaceState::setSolidProperties(
     const DataSolidProperties& data_solid_props) {
         mp_solid_props = Factory<SolidProperties>::create(
             solid_model, data_solid_props);
+}
+
+void SurfaceState::computeMoleFraction(Eigen::VectorXd v_xi) const
+{
+    
+    const Eigen::VectorXd v_rhoi = getSurfaceRhoi();
+    const Eigen::VectorXd v_T = getSurfaceT();
+    double m_Psurf = v_rhoi.dot(m_thermo.speciesMw().matrix().cwiseInverse())*RU*v_T(0);
+    v_xi = v_rhoi.cwiseProduct(m_thermo.speciesMw().matrix().cwiseInverse()) * RU * v_T(0) / m_Psurf;
+}
+
+const Eigen::VectorXd SurfaceState::computePartialDensityFromMoleFraction(Eigen::VectorXd v_xi) const
+{
+    const Eigen::VectorXd v_rhoi_s = getSurfaceRhoi();
+    const Eigen::VectorXd v_T = getSurfaceT();
+    double m_Psurf = v_rhoi_s.dot(m_thermo.speciesMw().matrix().cwiseInverse())*RU*v_T(0);
+    const Eigen::VectorXd v_rhoi = v_xi.cwiseProduct(m_thermo.speciesMw().matrix()) *
+    			  m_Psurf / (v_T(0) * RU);
+    return v_rhoi;
 }
 
     } // GasSurfaceInteraction

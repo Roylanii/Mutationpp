@@ -107,6 +107,16 @@ public:
      */
     virtual Eigen::VectorXd computeRatesPerReaction() = 0;
 
+    /**
+     * @brief This purly virtual function returns the Jacobian function
+     *  of the surface reaction rates according to the mole species fraction
+     *  and the temperature
+     * 
+     * @return Eigen::MatrixXd (ns,ns+nT)
+     * each col represents Jacoboan of the selected species density 
+     */
+    virtual Eigen::MatrixXd computeRatesJacobian() = 0;
+
 //==============================================================================
     /**
      * Purely virtual function which return the number of surface reactions.

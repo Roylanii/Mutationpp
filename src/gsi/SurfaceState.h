@@ -136,6 +136,24 @@ public:
         return *mp_solid_props;
     }
 
+    /**
+     * @brief Set the IterationsPert_m added by zhangjingchao
+     * 
+     * @param pert_m mass disturb intervals
+     */
+
+    void setIterationsPert_m(const double& pert_m);
+
+    void setIterationsPert_T(const double& pert_T);
+
+    const double& getIterationsPert_m() const;
+
+    const double& getIterationsPert_T() const ;
+
+    void computeMoleFraction(Eigen::VectorXd v_xi) const;
+
+    const Eigen::VectorXd computePartialDensityFromMoleFraction(Eigen::VectorXd v_xi) const;
+
 private:
     const Mutation::Thermodynamics::Thermodynamics& m_thermo;
     const SurfaceProperties* mp_surf_props;
@@ -143,6 +161,9 @@ private:
 
     const size_t m_ns;
     const size_t m_nT;
+
+    double m_pert_m;
+    double m_pert_T;
 
     Eigen::VectorXd mv_rhoi;
     Eigen::VectorXd mv_T;

@@ -8,7 +8,7 @@
     </species>
 
     <element_compositions default="BLedge">
-	    <composition name="Gas">C:0.0, O:0.5, N:0.5, C3:0.0, NO:0.0, CO:0.0, CN:0.0, N2:0.0, O2:0.0</composition>
+	    <composition name="Gas">C:0.0, O:0.3, N:0.3, C3:0.0, NO:0.3, CO:0.0, CN:0.0, N2:0.24, O2:0.22</composition>
             <composition name="BLedge">C:0.0, O:0.21, N:0.79</composition>
             <composition name="Char">C:1.0, O:0.0, N:0.0</composition>
     </element_compositions>

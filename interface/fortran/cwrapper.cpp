@@ -479,9 +479,14 @@ void NAME_MANGLE(set_diffusion_model)(double *xi_edge, double *dx)
 }
 
 //==============================================================================
-void NAME_MANGLE(set_cond_heat_flux)(double *T_edge, double *dx)
+void NAME_MANGLE(set_heatmodel_t)(double *T_edge, double *dx)
 {
     p_mix->setGasFourierHeatFluxModel(T_edge, *dx);
+}
+
+void NAME_MANGLE(set_heatmodel_q)(double *constHeat)
+{
+    p_mix->setGasFourierHeatFluxModel(*constHeat);
 }
 
 //==============================================================================
@@ -595,6 +600,11 @@ void NAME_MANGLE(setiterationssurfacebalance)(int *iters)
     p_mix->setIterationsSurfaceBalance(*iters);
 }
 
+void NAME_MANGLE(setsubiterationssurfacebalance)(int *iters)
+{
+    p_mix->setSubIterationsSurfaceBalance(*iters);
+}
+
 void NAME_MANGLE(setiterationspert_m)(double *pert_m)
 {
     p_mix->setIterationsPert_m(*pert_m);
@@ -635,6 +645,11 @@ void NAME_MANGLE(get_gsi_mechism)(F_STRING mechanism, F_STRLEN mechanism_length)
 void NAME_MANGLE(compute_gas_heat_flux)(double *v_T, double *heat_T)
 {
     *heat_T = p_mix->computeGasFourierHeatFlux(v_T);
+}
+
+void NAME_MANGLE(compute_gas_heat_const)(double *heat_T)
+{
+    *heat_T = p_mix->computeGasFourierHeatFlux();
 }
 
 void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN comp_length)

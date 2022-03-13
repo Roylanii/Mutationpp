@@ -354,6 +354,8 @@ public:
      */
     void stefanMaxwell(
         const double* const p_dp, double* const p_V, double& E, int order = 1);
+    void stefanMaxwell(
+        const double* const p_dp, double* const p_V, double& E, double& dt, int order = 1 );
 
     /**
      * Computes the species diffusion velocities and ambipolar electric field 

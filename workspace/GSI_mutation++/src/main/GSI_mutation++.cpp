@@ -26,7 +26,8 @@ int main(int argc, char *argv[])
     const double P_init = input.pressureinit();
     const double T_init = input.temperatureinit();
     // Setting number of iterations for the solver
-    mix.setIterationsSurfaceBalance(input.maxstepinit());
+    mix.setIterationsSurfaceBalance(input.maxiterationsinit());
+    mix.setSubIterationsSurfaceBalance(input.subiterationsinit());
     mix.setIterationsPert_m(input.pertminit());
     mix.setIterationsPert_T(input.pertTinit());
     mix.setIterationsEps(input.tolinit());
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
     // Mass gradient
     VectorXd xi_e(ns);
     xi_e = Map<const VectorXd>(mix.X(), ns);
-    // mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
+    //mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
     const double dx = input.distanceinit();
     mix.setDiffusionModel(xi_e.data(), dx);
 
@@ -55,12 +56,13 @@ int main(int argc, char *argv[])
     VectorXd T_e = Teq;
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
         mix.setGasFourierHeatFluxModel(T_e.data(), dx);
+        // mix.setGasFourierHeatFluxModel( 6000000.);
 
     // Initial conditions of the surface are the ones in the first
     // physical cell
     VectorXd rhoi_s(ns);
     mix.densities(rhoi_s.data());
-    VectorXd T_s = VectorXd::Constant(nT, (T_init / 2.0));
+    VectorXd T_s = VectorXd::Constant(nT, (T_init ));
     mix.setSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
 
     // Solve balance and request solution
@@ -81,12 +83,15 @@ int main(int argc, char *argv[])
     mix.stefanMaxwell(dxidx.data(), vdi.data(), E);
 
     // Conductive heat flux
-    VectorXd dTdx(nT);
-    VectorXd lambda(nT);
+    VectorXd gas_conduction(nT);
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
     {
-        dTdx = (T_s - T_e) / dx;
-        mix.frozenThermalConductivityVector(lambda.data());
+        
+        gas_conduction(pos_T_trans) = mix.computeGasFourierHeatFlux(T_s.data());
+        // VectorXd dTdx(nT);
+        // VectorXd lambda(nT);
+        // dTdx = (T_s - T_e) / dx;
+        // mix.frozenThermalConductivityVector(lambda.data());
         // std::cout<<mix.computeGasFourierHeatFlux(T_s.data());
     }
 
@@ -117,10 +122,11 @@ int main(int argc, char *argv[])
     //solid conduction
     VectorXd solid_conduction(nT);
     solid_conduction(pos_T_trans) = mix.computeSolidHeat();
+
     // MixtureOptions graphiteopt("graphite.xml");
     // Mixture graphite(graphiteopt);
     // const int set_state_PT = 1;
-    // // graphite.setState(&P_init, &T_s[0], 1);
+    // graphite.setState(&P_init, &T_s[0], 1);
     // const double P1=1000.0;
     // const double T1=300.0;
     // graphite.setState(&P1, &T1, 1);
@@ -133,7 +139,7 @@ int main(int argc, char *argv[])
         F.resize(neq);
     F.head(ns) = (rhoi_s / rho) * mblow + rhoi_s.cwiseProduct(vdi) - wdot;
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
-        F.tail(nT) = -lambda.cwiseProduct(dTdx) - q_srad + mblow * v_h -
+        F.tail(nT) = gas_conduction - q_srad + mblow * v_h -
                      v_hi_rhoi_vi + solid_conduction;
 
     // Compute error and write
@@ -199,7 +205,7 @@ int main(int argc, char *argv[])
     std::cout << std::endl;
     for (int j = 0; j < nT; ++j)
     {
-        std::cout << std::setw(22) << (-lambda(j)*(dTdx(j)));
+        std::cout << std::setw(22) << (gas_conduction(j));
         std::cout << std::setw(18) << (-q_srad(j));
         std::cout << std::setw(18) << (mblow * v_h(j));
         std::cout << std::setw(18) << (-v_hi_rhoi_vi(j));

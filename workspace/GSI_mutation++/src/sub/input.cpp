@@ -15,10 +15,11 @@ void Input::setDefaultOptions()
     m_pressure_init = 101325;
     m_temperature_init = 3000;
     m_distance = 1e-3;
-    m_maxstep = 100;
+    m_maxiteration = 50;
+    m_subiteration = 5;
     m_pert_m = 1e-2;
     m_pert_T = 1.0;
-    m_tol = 1.0e-12;
+    m_eps = 1.0e-12;
     m_iNewtonhistory = "false";
 #ifdef _WIN32
     m_separator = '\\';
@@ -113,15 +114,25 @@ void Input::distanceinit(const double &distance)
 }
 
 /// Gets the init maxstep.
-const int &Input::maxstepinit()
+const int &Input::maxiterationsinit()
 {
-    return m_maxstep;
+    return m_maxiteration;
+}
+
+const int &Input::subiterationsinit()
+{
+    return m_subiteration;
 }
 
 /// Sets the init maxstep.
-void Input::maxstepinit(const int &maxstep)
+void Input::maxiterationsinit(const int &maxstep)
 {
-    m_maxstep = maxstep;
+    m_maxiteration = maxstep;
+}
+
+void Input::subiterationsinit(const int &substep)
+{
+    m_subiteration = substep;
 }
 
 /// Gets the init increment species density.
@@ -150,13 +161,13 @@ void Input::pertTinit(const double& pert_T)
 
 const double &Input::tolinit()
 {
-    return m_tol;
+    return m_eps;
 }
 
 /// Sets the init increment temperature.
 void Input::tolinit(const double& tol)
 {
-    m_tol = tol;
+    m_eps = tol;
 }
 
 const std::string &Input::iNewtonhistory()
@@ -215,7 +226,9 @@ void Input::loadFromXmlElement(IO::XmlElement &element)
     element.getAttribute<double>("distance", m_distance, "distance must be given");
 
     // Get the type of Gas-Surface Interaction for the wall
-    element.getAttribute<int>("maxstep", m_maxstep, m_maxstep);
+    element.getAttribute<int>("maxiterations", m_maxiteration, m_maxiteration);
+
+    element.getAttribute<int>("subiterations", m_subiteration, m_subiteration);
 
     // Get the type of Gas-Surface Interaction for the wall
     element.getAttribute<double>("pert_m", m_pert_m, m_pert_m);
@@ -224,7 +237,7 @@ void Input::loadFromXmlElement(IO::XmlElement &element)
     element.getAttribute<double>("pert_T", m_pert_T, m_pert_T);
 
     // Get the type of Gas-Surface Interaction for the wall
-    element.getAttribute<double>("tolerance", m_tol, m_tol);
+    element.getAttribute<double>("resnorm", m_eps, m_eps);
 
     // Get the type of Gas-Surface Interaction for the wall
     element.getAttribute<std::string>("iNewtonhistory", m_iNewtonhistory, m_iNewtonhistory);

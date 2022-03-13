@@ -187,6 +187,10 @@ void GasSurfaceInteraction::setGasFourierHeatFluxModel(
         p_T_edge, m_thermo.nEnergyEqns()), dx);
 }
 
+void GasSurfaceInteraction::setGasFourierHeatFluxModel(const double& constHeat) {
+    mp_surf->setGasFourierHeatFluxModel(constHeat);
+}
+
 //==============================================================================
 
 void GasSurfaceInteraction::setGasRadHeatFlux(
@@ -207,6 +211,11 @@ void GasSurfaceInteraction::solveSurfaceBalance()
 void GasSurfaceInteraction::setIterationsSurfaceBalance(const int& iter)
 {
     mp_surf->setIterationsSurfaceBalance(iter);
+}
+
+void GasSurfaceInteraction::setSubIterationsSurfaceBalance(const int& iter)
+{
+    mp_surf->setSubIterationsSurfaceBalance(iter);
 }
 
 std::string GasSurfaceInteraction::getGSIMechanism()
@@ -232,16 +241,22 @@ void GasSurfaceInteraction::setIterationsEps(const double& eps)
 void GasSurfaceInteraction::setIterationsPert_m(const double& pert_m)
 {
     mp_surf->setIterationsPert_m(pert_m);
+    mp_surf_state->setIterationsPert_m(pert_m);
 }
 
 void GasSurfaceInteraction::setIterationsPert_T(const double& pert_T)
 {
     mp_surf->setIterationsPert_T(pert_T);
+    mp_surf_state->setIterationsPert_T(pert_T);
 }
 
 double GasSurfaceInteraction::computeGasFourierHeatFlux(const double* const v_T) {
     return mp_surf->computeGasFourierHeatFlux(Map<const VectorXd>(
         v_T, m_thermo.nEnergyEqns()));
+}
+
+double GasSurfaceInteraction::computeGasFourierHeatFlux() {
+    return mp_surf->computeGasFourierHeatFlux();
 }
 
 double GasSurfaceInteraction::computeSolidHeat()
