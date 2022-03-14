@@ -190,6 +190,21 @@ public:
 //==============================================================================
 // added by zhangjingchao
 // These virtual function are added to prevent calling from surface object
+    
+    /**
+     * @brief Get the Surface Residual with the given surface state
+     * 
+     * @param p_mass input surface state(species partial density)
+     * @param p_energy surface temperature
+     * @param p_res in return, surface residual
+     */
+    virtual void getSurfaceRes(double* const p_res)
+    {
+        throw LogicError()
+        << "getSurfaceRes can be called only when solving "
+        << "the surface balance!";
+    }
+    
     /**
      * Purely virtual function to be called to change the number of
      * iterations performed in the surface balance.

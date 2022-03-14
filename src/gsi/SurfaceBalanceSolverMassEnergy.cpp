@@ -209,6 +209,33 @@ public:
 
 //=============================================================================
 
+void getSurfaceRes(double* const p_res)
+    {
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_X.tail(m_nT) = m_surf_state.getSurfaceT();
+
+        // Impose equilibrium
+        if (is_surf_in_thermal_eq)
+            mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
+
+        saveUnperturbedPressure(mv_rhoi, mv_X.tail(m_nT));
+
+        // Changing to the solution variables
+        computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
+        applyTolerance(mv_X);
+
+        // Solving
+        updateFunction(mv_X);
+
+        for (int i_sp = 0; i_sp < m_ns+m_nT; ++i_sp){
+            p_res[i_sp] = mv_f(i_sp);
+        }
+    }
+
     void solveSurfaceBalance()
     {
         // errorUninitializedDiffusionModel
@@ -406,7 +433,6 @@ public:
         mv_f(pos_E) +=
             mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
         mv_f(pos_E) += hmix*mass_blow;
-
 
         // Radiation
         if (mp_surf_rad != NULL)

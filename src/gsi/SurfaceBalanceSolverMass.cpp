@@ -193,6 +193,30 @@ public:
             mv_rhoi.data(), mv_Tsurf.data(), set_state_with_rhoi_T);
     }
 
+    void getSurfaceRes(double* const p_res)
+    {
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_Tsurf = m_surf_state.getSurfaceT();
+
+        saveUnperturbedPressure(mv_rhoi);
+
+        // Changing to the solution variables
+        computeMoleFracfromPartialDens(mv_rhoi, mv_X);
+        applyTolerance(mv_X);
+
+        // Solving
+        updateFunction(mv_X);
+
+        for (int i_sp = 0; i_sp < m_ns; ++i_sp){
+            p_res[i_sp] = mv_f(i_sp);
+        }
+
+    }
+
 //==============================================================================
 
     void reducePert(){

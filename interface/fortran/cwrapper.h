@@ -490,6 +490,13 @@ void NAME_MANGLE(set_heatmodel_q)(double* constHeat);
 void NAME_MANGLE(solve_surface_balance)();
 
 /**
+ * @brief calculate surface residual
+ * @param v_x surface partial density(head) and temperature(tail)
+ * @param v_res surface residual
+ */
+void NAME_MANGLE(getsurfaceres)(double* const p_res);
+
+/**
  * Returns the current surface state with respect to partial densities and
  * surface temperatures.
  */

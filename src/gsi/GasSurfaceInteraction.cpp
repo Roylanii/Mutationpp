@@ -208,6 +208,11 @@ void GasSurfaceInteraction::solveSurfaceBalance()
 //==============================================================================
 // added by zhangjingchao
 
+void GasSurfaceInteraction::getSurfaceRes(double* const p_res)
+{
+    mp_surf->getSurfaceRes(p_res);
+}
+
 void GasSurfaceInteraction::setIterationsSurfaceBalance(const int& iter)
 {
     mp_surf->setIterationsSurfaceBalance(iter);
