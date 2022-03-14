@@ -231,7 +231,7 @@ void getSurfaceRes(double* const p_res)
         // Solving
         updateFunction(mv_X);
 
-        for (int i_sp = 0; i_sp < m_ns+m_nT; ++i_sp){
+        for (int i_sp = 0; i_sp <= m_ns; ++i_sp){
             p_res[i_sp] = mv_f(i_sp);
         }
     }
