@@ -154,7 +154,7 @@ T& NewtonSolver<T, Solver>::solve(T& x)
         static_cast<Solver&>(*this).updateFunction(x);
         if (m_conv_hist)
             cout << "Reduce pert, retrying Newton solver, iter= " << j << endl;
-        for (int i = 0; (!std::isnan(resnorm)&& i < (m_max_iter+ 30*j)) || (resnorm > m_epsilon && i < (m_max_iter + 30*j)); ++i)
+        for (int i = 0; (!std::isnan(resnorm)&& i < (m_max_iter+ 30*j)) && (resnorm > m_epsilon && i < (m_max_iter + 30*j)); ++i)
         {
             static_cast<Solver&>(*this).resetJacobian();
             if (m_conv_hist)
@@ -190,7 +190,8 @@ T& NewtonSolver<T, Solver>::solve(T& x)
         }
         x= x_min;
         resnorm = resnorm_min;
-
+        if (resnorm <=m_epsilon)
+            break;
     }
     if (resnorm > m_epsilon && m_conv_hist) {
         cout << "Newton solver failed to converge after " << m_sub_iter 
@@ -198,7 +199,9 @@ T& NewtonSolver<T, Solver>::solve(T& x)
         
     if (std::isnan(resnorm))
     {
-        cout << "Warning!!! Newton solver failed to convergence with residual" << resnorm << endl;
+        cout << "Warning!!! Newton solver failed to convergence with residual: " << resnorm << endl;
+        cout << "Surface state is set to the unsolved state" ;
+        x=x_unsolved;
     }
     return x;
     
