@@ -166,6 +166,16 @@ public:
         mp_diff_vel_calc->setDiffusionModel(v_mole_frac_edge, dx);
     }
 
+    void comSurfaceDiffusionVelocity(const Eigen::VectorXd& v_x, double* vdi)
+    {
+        Eigen::VectorXd vdiff(m_ns);
+        mp_diff_vel_calc->computeDiffusionVelocitiesYi(v_x,vdiff);
+        for (int i_s = 0; i_s < m_ns; i_s++)
+        {
+            vdi[i_s] = vdiff(i_s);
+        }
+    }
+
 //=============================================================================
 
     void solveSurfaceBalance()
@@ -202,14 +212,30 @@ public:
         mv_rhoi = m_surf_state.getSurfaceRhoi();
         mv_Tsurf = m_surf_state.getSurfaceT();
 
-        saveUnperturbedPressure(mv_rhoi);
+        // Setting Initial Gas and Surface State;
+        m_thermo.setState(
+            mv_rhoi.data(), mv_Tsurf.data(), set_state_with_rhoi_T);
 
-        // Changing to the solution variables
-        computeMoleFracfromPartialDens(mv_rhoi, mv_X);
-        applyTolerance(mv_X);
+        m_surf_state.setSurfaceState(
+            mv_rhoi.data(), mv_Tsurf.data(), set_state_with_rhoi_T);
 
-        // Solving
-        updateFunction(mv_X);
+        // Diffusion Fluxes
+        // mp_diff_vel_calc->computeDiffusionVelocities(v_mole_frac, mv_f);
+        Eigen::VectorXd yi(m_ns);
+        yi = mv_rhoi/mv_rhoi.sum();
+        mp_diff_vel_calc->computeDiffusionVelocitiesYi(yi, mv_f);
+
+        applyTolerance(mv_f);
+        mv_f = mv_rhoi.cwiseProduct(mv_f);
+
+        // Chemical Production Rates
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        mv_f -= mv_surf_reac_rates;
+
+        // Blowing Fluxes
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+        mv_f += mv_rhoi * mass_blow / mv_rhoi.sum();
 
         for (int i_sp = 0; i_sp < m_ns; ++i_sp){
             p_res[i_sp] = mv_f(i_sp);
@@ -261,7 +287,11 @@ public:
             mv_rhoi.data(), mv_Tsurf.data(), set_state_with_rhoi_T);
 
         // Diffusion Fluxes
-        mp_diff_vel_calc->computeDiffusionVelocities(v_mole_frac, mv_f);
+        // mp_diff_vel_calc->computeDiffusionVelocities(v_mole_frac, mv_f);
+        Eigen::VectorXd yi(m_ns);
+        yi = mv_rhoi/mv_rhoi.sum();
+        mp_diff_vel_calc->computeDiffusionVelocitiesYi(yi, mv_f);
+
         applyTolerance(mv_f);
         mv_f = mv_rhoi.cwiseProduct(mv_f);
 

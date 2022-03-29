@@ -154,7 +154,7 @@ T& NewtonSolver<T, Solver>::solve(T& x)
         static_cast<Solver&>(*this).updateFunction(x);
         if (m_conv_hist)
             cout << "Reduce pert, retrying Newton solver, iter= " << j << endl;
-        for (int i = 0; (!std::isnan(resnorm)&& i < (m_max_iter+ 30*j)) && (resnorm > m_epsilon && i < (m_max_iter + 30*j)); ++i)
+        for (int i = 0; (!std::isnan(resnorm)&& i < (m_max_iter+ 10*j)) && (resnorm > m_epsilon && i < (m_max_iter + 10*j)); ++i)
         {
             static_cast<Solver&>(*this).resetJacobian();
             if (m_conv_hist)
@@ -164,7 +164,7 @@ T& NewtonSolver<T, Solver>::solve(T& x)
             {
                 if (m_conv_hist)
                     cout << ", update J";
-                if (i <3)
+                if (i <4)
                 {
                     static_cast<Solver &>(*this).updateEnergyJacobianResolve(x,j);
                 } // only update Energy jacobian at the begining
@@ -203,8 +203,7 @@ T& NewtonSolver<T, Solver>::solve(T& x)
         cout << "Surface state is set to the unsolved state" ;
         x=x_unsolved;
     }
-    return x;
-    
+    return x;  
 
 }
 

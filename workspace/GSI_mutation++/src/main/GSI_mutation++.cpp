@@ -47,10 +47,13 @@ int main(int argc, char *argv[])
 
     // Mass gradient
     VectorXd xi_e(ns);
-    xi_e = Map<const VectorXd>(mix.X(), ns);
-    //mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
+    VectorXd xi_ey(ns);
     const double dx = input.distanceinit();
-    mix.setDiffusionModel(xi_e.data(), dx);
+    xi_ey = Map<const VectorXd>(mix.Y(), ns);
+    xi_e = Map<const VectorXd>(mix.X(), ns);
+    // std::cout <<xi_e<<xi_ey;
+    //mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
+    mix.setDiffusionModel(xi_ey.data(), dx);
 
     // Temperature gradient
     VectorXd T_e = Teq;
@@ -73,14 +76,18 @@ int main(int argc, char *argv[])
     // Verifying the solution gives low residual in the balance equations
     mix.setState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
     VectorXd xi_s(ns);
-    xi_s = Map<const VectorXd>(mix.X(), ns);
-
+    // xi_s = Map<const VectorXd>(mix.X(), ns);
     // Compute diffusion velocities
-    VectorXd dxidx(ns);
-    dxidx = (xi_s - xi_e) / dx;
+    
     VectorXd vdi(ns);
-    double E = 0.;
-    mix.stefanMaxwell(dxidx.data(), vdi.data(), E);
+    // VectorXd dxidx(ns);
+    // dxidx = (xi_s - xi_e) / dx;
+    // double E = 0.;
+    // mix.stefanMaxwell(dxidx.data(), vdi.data(), E);
+    // std::cout <<vdi;
+    // mix.setDiffusionModel(xi_ey.data(), dx);
+    xi_s =rhoi_s/rhoi_s.sum();
+    mix.comSurfaceDiffusionVelocity(xi_s.data(),vdi.data());
 
     // Conductive heat flux
     VectorXd gas_conduction(nT);
@@ -108,7 +115,7 @@ int main(int argc, char *argv[])
     VectorXd v_hi(ns * nT);
     mix.getEnthalpiesMass(v_hi.data());
     VectorXd v_h(nT);
-    v_h(pos_T_trans) = (rhoi_s / rho).dot(v_hi.head(ns));
+    v_h(pos_T_trans) = mix.mixtureHMass();//(rhoi_s / rho).dot(v_hi.head(ns));
 
     // Surface radiation
     VectorXd q_srad = VectorXd::Zero(nT);
@@ -117,21 +124,11 @@ int main(int argc, char *argv[])
 
     // Chemical Energy Contribution
     VectorXd v_hi_rhoi_vi = VectorXd::Zero(nT);
-    v_hi_rhoi_vi(pos_T_trans) = -v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
+    v_hi_rhoi_vi(pos_T_trans) = v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
 
     //solid conduction
     VectorXd solid_conduction(nT);
     solid_conduction(pos_T_trans) = mix.computeSolidHeat();
-
-    // MixtureOptions graphiteopt("graphite.xml");
-    // Mixture graphite(graphiteopt);
-    // const int set_state_PT = 1;
-    // graphite.setState(&P_init, &T_s[0], 1);
-    // const double P1=1000.0;
-    // const double T1=300.0;
-    // graphite.setState(&P1, &T1, 1);
-    // double hcp = graphite.mixtureHMass(T1);
-    // std::cout << "hcp=" << hcp <<std::endl;
 
     // Building balance functions
     VectorXd F(ns);
@@ -139,7 +136,7 @@ int main(int argc, char *argv[])
         F.resize(neq);
     F.head(ns) = (rhoi_s / rho) * mblow + rhoi_s.cwiseProduct(vdi) - wdot;
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
-        F.tail(nT) = gas_conduction - q_srad + mblow * v_h -
+        F.tail(nT) = gas_conduction - q_srad + mblow * v_h +
                      v_hi_rhoi_vi + solid_conduction;
 
     // Compute error and write

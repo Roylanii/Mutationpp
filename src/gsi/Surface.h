@@ -281,6 +281,14 @@ public:
             << "computeGasFourierHeatFlux can be called only when solving "
             << "the surface energy balance!";
     }
+    virtual void comSurfaceDiffusionVelocity(const Eigen::VectorXd& v_x, double* vdi)
+    {
+        {
+        throw LogicError()
+            << "comSurfaceDiffusionVelocity can be called only when solving "
+            << "the surface energy balance!";
+    }
+    }
 
     virtual double computeGasFourierHeatFlux()
     {

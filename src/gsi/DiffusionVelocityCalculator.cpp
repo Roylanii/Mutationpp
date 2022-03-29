@@ -92,6 +92,23 @@ void DiffusionVelocityCalculator::computeDiffusionVelocities(
         electric_field);
 }
 
+void DiffusionVelocityCalculator::computeDiffusionVelocitiesYi(
+    const VectorXd& v_mass_frac,
+    VectorXd& v_diff_velocities)
+{
+    if (!m_is_diff_set) {
+    	throw LogicError()
+        << "Calling DiffusionVelocityCalculator::computeDrivingForces() before "
+        << "calling DiffusionVelocityCalculator::setDiffusionCalculator().";
+    }
+    // mv_mole_frac_edge is species mass fraction actually
+    // for simplcity, use the same variable to avoid new varaable 
+    mv_dxidx = (v_mass_frac - mv_mole_frac_edge)/m_dx;
+    VectorXd di(m_ns);
+    m_transport.averageDiffusionCoeffs(di.data());
+    v_diff_velocities = -di.cwiseProduct(mv_dxidx);
+}
+
 Eigen::MatrixXd DiffusionVelocityCalculator::computeDiffusionVelocitiesJacobian(
     const VectorXd& v_mole_frac, const double& pert_m, const double& pert_T)
 {

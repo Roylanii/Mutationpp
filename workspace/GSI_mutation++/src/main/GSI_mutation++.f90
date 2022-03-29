@@ -47,7 +47,7 @@ program main
 
     !set diffusion model use equilibrium composition of the mixture with given T,P
     call mpp_equilibrate(m_temperature_init, m_pressure_init)
-    call mpp_x(xi_e)
+    call mpp_y(xi_e)
     !boundary edge composition can be given by input
     !call mpp_get_species_composition("Gas",xi_e)
     call mpp_set_diffusion_model(xi_e, m_distance)
@@ -73,9 +73,11 @@ program main
     call mpp_x(xi_s)
 
     ! compute diffusion velocities
-    dxidx = (xi_s - xi_e)/m_distance; 
-    E = 0.0
-    call mpp_stefan_maxwell(dxidx, vdi, E)
+    ! dxidx = (xi_s - xi_e)/m_distance; 
+    ! E = 0.0
+    ! call mpp_stefan_maxwell(dxidx, vdi, E)
+    xi_s = rhoi_s/rho
+    call mpp_compute_diffusion_velocity(xi_s,vdi)
 
     ! compute heat flux
     if (m_gsi_mechism == "phenomenological_mass_energy") then
@@ -94,8 +96,10 @@ program main
     call mpp_mass_blowing_rate(mblow)
 
     ! Species and mixture enthalpies
-    call mpp_species_h_mass(v_hi)
-    v_h(pos_T_trans) = DOT_PRODUCT(rhoi_s(1:ns)/rho, v_hi(1:ns))
+     call mpp_species_h_mass(v_hi)
+    ! v_h(pos_T_trans) = DOT_PRODUCT(rhoi_s(1:ns)/rho, v_hi(1:ns))
+     v_h(pos_T_trans) = mpp_mixture_h_mass()
+
 
     ! Surface radiation
     if (m_gsi_mechism == "phenomenological_mass_energy") then

@@ -215,6 +215,8 @@ public:
 
     double computeSolidHeat();
 
+    void comSurfaceDiffusionVelocity(const double* const v_x, double* vdi);
+
     //added by zhangjingchao, end
 
     //========================================================================

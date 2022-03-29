@@ -74,7 +74,7 @@ public:
           mv_f(m_neqns),
           mv_f_unpert(m_neqns),
           m_jac(m_neqns, m_neqns),
-          m_tol(1.e-15),
+          m_tol(1.e-20),
           m_pert_m(1.e-2),
           m_pert_T(1.e0),
           pos_E(m_ns),
@@ -185,7 +185,19 @@ public:
     void setDiffusionModel(
         const Eigen::VectorXd& v_x_edge, const double& dx)
     {
+        //transform mole fraction to mass fraction
+        // Eigen::VectorXd yi(m_ns);
+        // double Molemass=0;
+        // for (int i_s=0;i_s<m_ns;i_s++)
+        // {
+        //     Molemass = v_x_edge(i_s)*m_thermo.speciesMw(i_s);
+        // }
+        // for (int i_s=0;i_s<m_ns;i_s++)
+        // {
+        //     yi(i_s) = v_x_edge(i_s) * m_thermo.speciesMw(i_s) / Molemass;
+        // } 
         mp_diff_vel_calc->setDiffusionModel(v_x_edge, dx);
+        // mp_diff_vel_calc->setDiffusionModel(yi, dx);
     }
 
 //=============================================================================
@@ -213,25 +225,61 @@ void getSurfaceRes(double* const p_res)
     {
         // errorUninitializedDiffusionModel
         errorSurfaceStateNotSet();
+        mv_f.setZero();
 
     	// Getting the state
         mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_X.head(m_ns) = mv_rhoi; 
         mv_X.tail(m_nT) = m_surf_state.getSurfaceT();
 
         // Impose equilibrium
         if (is_surf_in_thermal_eq)
             mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
-
-        saveUnperturbedPressure(mv_rhoi, mv_X.tail(m_nT));
+        m_thermo.setState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        m_surf_state.setSurfaceState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
 
         // Changing to the solution variables
-        computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
-        applyTolerance(mv_X);
+        // computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
+        // applyTolerance(mv_X);
 
-        // Solving
-        updateFunction(mv_X);
+        Eigen::VectorXd yi(m_ns);
+        yi = mv_rhoi/mv_rhoi.sum();
+        mp_diff_vel_calc->computeDiffusionVelocitiesYi(
+           yi, mv_Vdiff);
 
-        for (int i_sp = 0; i_sp <= m_ns; ++i_sp){
+        applyTolerance(mv_Vdiff);
+        mv_f.head(m_ns) += mv_rhoi.cwiseProduct(mv_Vdiff);
+
+        // Chemical Production Rates
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        mv_f.head(m_ns) -= mv_surf_reac_rates;
+
+        // Blowing flux
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+        mv_f.head(m_ns) += mv_rhoi*mass_blow/mv_rhoi.sum();
+
+        // Solid conduction heat flux
+        double solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+        mv_f(pos_E) += solid_heat;  
+
+        // Energy
+        m_thermo.getEnthalpiesMass(mv_hi.data());
+        double hmix = m_thermo.mixtureHMass();
+
+        mv_f(pos_E) +=
+           mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(mv_rhoi));
+        mv_f(pos_E) +=
+            mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));
+        mv_f(pos_E) += hmix*mass_blow;
+
+        // Radiation
+        if (mp_surf_rad != NULL)
+            mv_f(pos_E) -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+
+        for (int i_sp = 0; i_sp < m_neqns; ++i_sp){
             p_res[i_sp] = mv_f(i_sp);
         }
     }
@@ -259,12 +307,18 @@ void getSurfaceRes(double* const p_res)
         mv_X = solve(mv_X);
 
         applyTolerance(mv_X);
+        if (is_surf_in_thermal_eq)
+            mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
         computePartialDensfromMoleFrac(
             mv_X.head(m_ns), mv_X.tail(m_nT), mv_rhoi);
 
         // Setting the state again
+        m_thermo.setState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
         m_surf_state.setSurfaceState(
             mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        //     computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
+        // 一定不要再计算结束后computeMoleFracfromPartialDens,会修改壁面状态导致获取错误值
     }
 
     void solveSurfaceBalanceNewJacobian()
@@ -360,6 +414,16 @@ void getSurfaceRes(double* const p_res)
 
     double getSurfaceRadiativeHeatFlux() {return mp_surf_rad->surfaceNetRadiativeHeatFlux();}
 
+    void comSurfaceDiffusionVelocity(const Eigen::VectorXd& v_x, double* vdi)
+    {
+        Eigen::VectorXd vdiff(m_ns);
+        mp_diff_vel_calc->computeDiffusionVelocitiesYi(v_x,vdiff);
+        for (int i_s = 0; i_s < m_ns; i_s++)
+        {
+            vdi[i_s] = vdiff(i_s);
+        }
+    }
+
     void setIterationsHistory(const bool& iof){ setWriteConvergenceHistory(iof); }
 
     void setIterationsEps(const double& eps){ setEpsilon(eps); }
@@ -405,9 +469,14 @@ void getSurfaceRes(double* const p_res)
         m_surf_state.setSurfaceState(
             mv_rhoi.data(), v_X.tail(m_nT).data(), set_state_with_rhoi_T);
 
-        // Diffusion Fluxes
-        mp_diff_vel_calc->computeDiffusionVelocities(
-            v_X.head(m_ns), mv_Vdiff);
+        // Diffusion Fluxes     
+        // mp_diff_vel_calc->computeDiffusionVelocities(
+        //     v_X.head(m_ns), mv_Vdiff);
+        Eigen::VectorXd yi(m_ns);
+        yi = mv_rhoi/mv_rhoi.sum();
+        mp_diff_vel_calc->computeDiffusionVelocitiesYi(
+           yi, mv_Vdiff);
+
         applyTolerance(mv_Vdiff);
         mv_f.head(m_ns) += mv_rhoi.cwiseProduct(mv_Vdiff);
 
@@ -874,11 +943,13 @@ private:
     void computeMoleFracfromPartialDens(
         const Eigen::VectorXd& v_rhoi, const Eigen::VectorXd& v_T,
         Eigen::VectorXd& v_xi)
-    {
+    {//不要再迭代结束后调用此函数
         m_thermo.setState(
             v_rhoi.data(), v_T.data(), set_state_with_rhoi_T);
         v_xi.head(m_ns) = Eigen::Map<const Eigen::VectorXd>(
             m_thermo.X(), m_ns);
+        // v_xi = v_rhoi.cwiseProduct(m_thermo.speciesMw().inverse().matrix())* 
+        // (v_T(0) * RU)/m_Psurf;
     }
 //==============================================================================
 
@@ -886,7 +957,7 @@ private:
         const Eigen::VectorXd& v_xi, const Eigen::VectorXd& v_T,
         Eigen::VectorXd& v_rhoi)
     {
-    	v_rhoi = v_xi.cwiseProduct(m_thermo.speciesMw().matrix()) *
+    	v_rhoi = v_xi.cwiseProduct( m_thermo.speciesMw().matrix()) *
     			  m_Psurf / (v_T(pos_T_trans) * RU);
     }
 //==============================================================================

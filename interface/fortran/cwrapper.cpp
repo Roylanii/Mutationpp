@@ -658,6 +658,11 @@ void NAME_MANGLE(compute_gas_heat_const)(double *heat_T)
     *heat_T = p_mix->computeGasFourierHeatFlux();
 }
 
+void NAME_MANGLE(compute_diffusion_velocity)(double* v_x, double* vdi)
+{
+    p_mix->comSurfaceDiffusionVelocity(v_x,vdi);
+}
+
 void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN comp_length)
 {
     p_mix->getSpeciesComposition(char_to_string(comp,comp_length),p_vec,Composition::MOLE);

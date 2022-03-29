@@ -570,6 +570,8 @@ void NAME_MANGLE(get_gsi_mechism)(F_STRING mechanism, F_STRLEN mechanism_length)
 void NAME_MANGLE(compute_gas_heat_flux)(double *v_T, double* heat_T);
 void NAME_MANGLE(compute_gas_heat_const)(double *heat_T);
 
+void NAME_MANGLE(compute_diffusion_velocity)(double* v_x, double* vdi);
+
 void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN comp_length);
 
 double NAME_MANGLE(get_solid_heat)();

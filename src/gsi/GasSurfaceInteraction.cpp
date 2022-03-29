@@ -264,6 +264,12 @@ double GasSurfaceInteraction::computeGasFourierHeatFlux() {
     return mp_surf->computeGasFourierHeatFlux();
 }
 
+void GasSurfaceInteraction::comSurfaceDiffusionVelocity(const double* const v_x, double* vdi) {
+    
+    mp_surf->comSurfaceDiffusionVelocity(Map<const VectorXd>(
+        v_x, m_thermo.nSpecies()),vdi);
+}
+
 double GasSurfaceInteraction::computeSolidHeat()
 {
     return mp_surf_state->solidProps().getSteadyStateHeat();
