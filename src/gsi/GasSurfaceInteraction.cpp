@@ -208,6 +208,11 @@ void GasSurfaceInteraction::solveSurfaceBalance()
 //==============================================================================
 // added by zhangjingchao
 
+void GasSurfaceInteraction::solveSurfaceGradient(double* p_dy, double* p_dT)
+{
+    mp_surf->solveSurfaceGradient(p_dy, p_dT);
+}
+
 void GasSurfaceInteraction::getSurfaceRes(double* const p_res)
 {
     mp_surf->getSurfaceRes(p_res);

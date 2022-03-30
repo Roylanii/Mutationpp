@@ -47,13 +47,11 @@ int main(int argc, char *argv[])
 
     // Mass gradient
     VectorXd xi_e(ns);
-    VectorXd xi_ey(ns);
     const double dx = input.distanceinit();
-    xi_ey = Map<const VectorXd>(mix.Y(), ns);
-    xi_e = Map<const VectorXd>(mix.X(), ns);
+    xi_e = Map<const VectorXd>(mix.Y(), ns);
     // std::cout <<xi_e<<xi_ey;
     //mix.getSpeciesComposition(std::string("Gas"), xi_e.data(),Composition::MOLE);
-    mix.setDiffusionModel(xi_ey.data(), dx);
+    mix.setDiffusionModel(xi_e.data(), dx);
 
     // Temperature gradient
     VectorXd T_e = Teq;
@@ -76,18 +74,19 @@ int main(int argc, char *argv[])
     // Verifying the solution gives low residual in the balance equations
     mix.setState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
     VectorXd xi_s(ns);
+    VectorXd vdi(ns);
     // xi_s = Map<const VectorXd>(mix.X(), ns);
     // Compute diffusion velocities
-    
-    VectorXd vdi(ns);
     // VectorXd dxidx(ns);
-    // dxidx = (xi_s - xi_e) / dx;
+    //     VectorXd xi_ex(ns);
+    //     xi_ex = Map<const VectorXd>(mix.X(), ns);
+    // dxidx = (xi_s - xi_ex) / dx;
     // double E = 0.;
     // mix.stefanMaxwell(dxidx.data(), vdi.data(), E);
-    // std::cout <<vdi;
-    // mix.setDiffusionModel(xi_ey.data(), dx);
-    xi_s =rhoi_s/rhoi_s.sum();
+    // std::cout <<"stefanmaxwell"<<vdi.cwiseProduct(rhoi_s)<<std::endl;
+    xi_s = rhoi_s/rhoi_s.sum();
     mix.comSurfaceDiffusionVelocity(xi_s.data(),vdi.data());
+    // std::cout <<"Dim"<<rhoi_s.sum() * vdi<<std::endl;
 
     // Conductive heat flux
     VectorXd gas_conduction(nT);
@@ -105,6 +104,15 @@ int main(int argc, char *argv[])
     // Get surface production rates
     VectorXd wdot(ns);
     mix.setSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
+    // Eigen::VectorXd v_dy(ns);
+    // Eigen::VectorXd v_dt(nT);
+    // mix.solveSurfaceGradient(v_dy.data(),v_dt.data());
+    // std::cout << "v_dy=" << v_dy<<std::endl;
+    // std::cout << "v_dt=" << v_dt<<std::endl;
+    // Eigen::VectorXd res(neq);
+    // mix.getSurfaceRes(res.data());
+    // std::cout << "res=" << res<<std::endl;
+
     mix.surfaceReactionRates(wdot.data());
 
     // Blowing flux (should be zero for catalysis)
@@ -124,7 +132,8 @@ int main(int argc, char *argv[])
 
     // Chemical Energy Contribution
     VectorXd v_hi_rhoi_vi = VectorXd::Zero(nT);
-    v_hi_rhoi_vi(pos_T_trans) = v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
+    // v_hi_rhoi_vi(pos_T_trans) = v_hi.head(ns).dot(rhoi_s.cwiseProduct(vdi));
+    v_hi_rhoi_vi(pos_T_trans) = v_hi.head(ns).dot(rhoi_s.sum()*vdi);
 
     //solid conduction
     VectorXd solid_conduction(nT);
@@ -134,7 +143,8 @@ int main(int argc, char *argv[])
     VectorXd F(ns);
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
         F.resize(neq);
-    F.head(ns) = (rhoi_s / rho) * mblow + rhoi_s.cwiseProduct(vdi) - wdot;
+    F.head(ns) = mblow * (rhoi_s / rho) + rhoi_s.sum()*vdi - wdot;
+    // F.head(ns) = (rhoi_s / rho) * mblow + rhoi_s.cwiseProduct(vdi) - wdot;
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
         F.tail(nT) = gas_conduction - q_srad + mblow * v_h +
                      v_hi_rhoi_vi + solid_conduction;

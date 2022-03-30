@@ -107,12 +107,20 @@ double GasFourierHeatFluxCalculator::computeGasFourierHeatFlux(
     }
     else {
         mv_dTdx = (v_T - mv_T_edge)/m_dx;
+        // std::cout <<"comres_dTdn"<<mv_dTdx<<std::endl;
         m_transport.frozenThermalConductivityVector(mv_lambda.data());
         return -mv_lambda.dot(mv_dTdx);
     }
 
     
 }
+
+void GasFourierHeatFluxCalculator::computeGasConductivity(
+    VectorXd& v_lambda)
+{
+    m_transport.frozenThermalConductivityVector(v_lambda.data());
+}
+
 double GasFourierHeatFluxCalculator::computeGasFourierHeatFlux()
 {
     if (!m_is_cond_set) {

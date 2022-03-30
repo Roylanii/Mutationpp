@@ -249,8 +249,10 @@ void getSurfaceRes(double* const p_res)
         mp_diff_vel_calc->computeDiffusionVelocitiesYi(
            yi, mv_Vdiff);
 
-        applyTolerance(mv_Vdiff);
-        mv_f.head(m_ns) += mv_rhoi.cwiseProduct(mv_Vdiff);
+        // applyTolerance(mv_Vdiff);
+        // 用二元扩散系数求扩散速度用这个
+        mv_f.head(m_ns) += mv_rhoi.sum()*mv_Vdiff;
+        // mv_f.head(m_ns) += mv_rhoi.cwiseProduct(mv_Vdiff);
 
         // Chemical Production Rates
         computeSurfaceReactionRates(mv_surf_reac_rates);
@@ -270,7 +272,8 @@ void getSurfaceRes(double* const p_res)
         double hmix = m_thermo.mixtureHMass();
 
         mv_f(pos_E) +=
-           mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(mv_rhoi));
+           mv_hi.head(m_ns).dot(mv_rhoi.sum() * mv_Vdiff);
+        //    mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(mv_rhoi));
         mv_f(pos_E) +=
             mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));
         mv_f(pos_E) += hmix*mass_blow;
@@ -319,6 +322,65 @@ void getSurfaceRes(double* const p_res)
             mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
         //     computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
         // 一定不要再计算结束后computeMoleFracfromPartialDens,会修改壁面状态导致获取错误值
+    }
+
+    void solveSurfaceGradient(double* p_dy, double* p_dT)
+    {
+        Eigen::VectorXd v_dy(m_ns);
+        Eigen::VectorXd v_dT(m_nT);
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+        mv_f.setZero();
+
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_X.tail(m_nT) = m_surf_state.getSurfaceT();
+
+        // Impose equilibrium
+        if (is_surf_in_thermal_eq)
+            mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
+        m_thermo.setState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        m_surf_state.setSurfaceState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        mv_f.head(m_ns) -= mv_surf_reac_rates;
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+        mv_f.head(m_ns) += mv_rhoi*mass_blow/mv_rhoi.sum();
+
+        Eigen::VectorXd v_di(m_ns);
+        mp_diff_vel_calc->getDiffuisonCoe(v_di);
+        // applyTolerance(v_di);
+        v_dy = mv_f.head(m_ns).cwiseQuotient(v_di)/mv_rhoi.sum();
+        mv_Vdiff = -v_di.cwiseProduct(v_dy);
+
+        double solid_heat = mass_blow * m_surf_state.solidProps().getSteadyStateHeat();
+        mv_f(pos_E) += solid_heat;
+        m_thermo.getEnthalpiesMass(mv_hi.data());
+        double hmix = m_thermo.mixtureHMass();
+
+        mv_f(pos_E) +=
+           mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum());
+        mv_f(pos_E) += hmix*mass_blow;
+         // Radiation
+        if (mp_surf_rad != NULL)
+            mv_f(pos_E) -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+
+        Eigen::VectorXd v_lambda(m_nT);
+        mp_gas_heat_flux_calc->computeGasConductivity(v_lambda);
+
+        if (m_nT !=1 )
+        {
+            std::cout << "multi temperature is not aviliable now";
+            exit;
+        }
+        v_dT(pos_T_trans) = mv_f(pos_E)/v_lambda(pos_T_trans);
+        for (int i_s = 0; i_s < m_ns; i_s++)
+            p_dy[i_s] = v_dy(i_s);
+        for (int i_s = 0; i_s < m_nT; i_s++)
+            p_dT[i_s] = v_dT(i_s);
     }
 
     void solveSurfaceBalanceNewJacobian()
@@ -477,8 +539,10 @@ void getSurfaceRes(double* const p_res)
         mp_diff_vel_calc->computeDiffusionVelocitiesYi(
            yi, mv_Vdiff);
 
-        applyTolerance(mv_Vdiff);
-        mv_f.head(m_ns) += mv_rhoi.cwiseProduct(mv_Vdiff);
+        // applyTolerance(mv_Vdiff);
+        // mv_f.head(m_ns) += mv_rhoi.cwiseProduct(mv_Vdiff);
+        // 用二元扩散系数求扩散速度用这个
+        mv_f.head(m_ns) += mv_rhoi.sum() * mv_Vdiff;
 
         // Chemical Production Rates
         computeSurfaceReactionRates(mv_surf_reac_rates);
@@ -496,9 +560,11 @@ void getSurfaceRes(double* const p_res)
         // Energy
         m_thermo.getEnthalpiesMass(mv_hi.data());
         double hmix = m_thermo.mixtureHMass();
+        // 用二元扩散系数求扩散速度用这个
+        mv_f(pos_E) += mv_hi.head(m_ns).dot(mv_rhoi.sum() * mv_Vdiff);
+        //    mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(mv_rhoi));
+        
 
-        mv_f(pos_E) +=
-           mv_hi.head(m_ns).dot(mv_Vdiff.cwiseProduct(mv_rhoi));
         mv_f(pos_E) +=
             mp_gas_heat_flux_calc->computeGasFourierHeatFlux(v_X.tail(m_nT));
         mv_f(pos_E) += hmix*mass_blow;

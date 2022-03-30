@@ -80,6 +80,7 @@ public:
      */
     double computeGasFourierHeatFlux(const Eigen::VectorXd& v_T);
     double computeGasFourierHeatFlux();
+    void computeGasConductivity(Eigen::VectorXd& v_lambda);
 
 private:
     Mutation::Transport::Transport& m_transport;

@@ -203,6 +203,32 @@ public:
             mv_rhoi.data(), mv_Tsurf.data(), set_state_with_rhoi_T);
     }
 
+    void solveSurfaceGradient(double* p_dy, double* p_dT)
+    {
+        Eigen::VectorXd v_dy(m_ns);
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+        mv_f.setZero();
+
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        mv_f.head(m_ns) -= mv_surf_reac_rates;
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+        mv_f.head(m_ns) += mv_rhoi*mass_blow/mv_rhoi.sum();
+
+        Eigen::VectorXd v_di(m_ns);
+        mp_diff_vel_calc->getDiffuisonCoe(v_di);
+        applyTolerance(v_di);
+        v_dy = mv_f.head(m_ns).cwiseQuotient(v_di)/mv_rhoi.sum();
+
+        for (int i_s = 0; i_s < m_ns; i_s++)
+            p_dy[i_s] = v_dy(i_s);
+
+    }
+
     void getSurfaceRes(double* const p_res)
     {
         // errorUninitializedDiffusionModel
@@ -226,7 +252,7 @@ public:
         mp_diff_vel_calc->computeDiffusionVelocitiesYi(yi, mv_f);
 
         applyTolerance(mv_f);
-        mv_f = mv_rhoi.cwiseProduct(mv_f);
+        mv_f = mv_rhoi.sum()*mv_f;
 
         // Chemical Production Rates
         computeSurfaceReactionRates(mv_surf_reac_rates);
@@ -293,7 +319,8 @@ public:
         mp_diff_vel_calc->computeDiffusionVelocitiesYi(yi, mv_f);
 
         applyTolerance(mv_f);
-        mv_f = mv_rhoi.cwiseProduct(mv_f);
+        // mv_f = mv_rhoi.cwiseProduct(mv_f);
+        mv_f = mv_rhoi.sum()*mv_f;
 
         // Chemical Production Rates
         computeSurfaceReactionRates(mv_surf_reac_rates);

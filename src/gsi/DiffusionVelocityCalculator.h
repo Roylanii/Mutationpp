@@ -86,6 +86,7 @@ public:
     void computeDiffusionVelocitiesYi(
         const Eigen::VectorXd& v_mass_frac,
         Eigen::VectorXd& v_diff_velocities);
+    void getDiffuisonCoe(Eigen::VectorXd& v_di);
 
     Eigen::MatrixXd computeDiffusionVelocitiesJacobian(
         const Eigen::VectorXd& v_mole_frac, const double& pert_m, const double& pert_T);

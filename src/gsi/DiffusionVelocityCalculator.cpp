@@ -96,6 +96,8 @@ void DiffusionVelocityCalculator::computeDiffusionVelocitiesYi(
     const VectorXd& v_mass_frac,
     VectorXd& v_diff_velocities)
 {
+    //警告 使用平均扩散系数计算组分运输速度必须使用质量分数梯度,且乘以混合物密度
+    //而原steMaxwell分布法使用摩尔比数,且单独乘以组分密度
     if (!m_is_diff_set) {
     	throw LogicError()
         << "Calling DiffusionVelocityCalculator::computeDrivingForces() before "
@@ -104,9 +106,15 @@ void DiffusionVelocityCalculator::computeDiffusionVelocitiesYi(
     // mv_mole_frac_edge is species mass fraction actually
     // for simplcity, use the same variable to avoid new varaable 
     mv_dxidx = (v_mass_frac - mv_mole_frac_edge)/m_dx;
+    // std::cout <<"comres_dydn"<<mv_dxidx<<std::endl;
     VectorXd di(m_ns);
     m_transport.averageDiffusionCoeffs(di.data());
     v_diff_velocities = -di.cwiseProduct(mv_dxidx);
+}
+
+void DiffusionVelocityCalculator::getDiffuisonCoe(Eigen::VectorXd& v_di)
+{
+    m_transport.averageDiffusionCoeffs(v_di.data());
 }
 
 Eigen::MatrixXd DiffusionVelocityCalculator::computeDiffusionVelocitiesJacobian(

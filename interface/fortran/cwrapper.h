@@ -549,6 +549,8 @@ void NAME_MANGLE(loaddoublefromfile)(
     F_STRING m_input_file, F_STRING m_argc, double *value,
     F_STRLEN input_length, F_STRLEN argc_length);
 
+void NAME_MANGLE(solve_surface_gradient)(double* p_dy, double* p_dT);
+
 void NAME_MANGLE(setiterationssurfacebalance)(int *iters);
 
 void NAME_MANGLE(setsubiterationssurfacebalance)(int *iters);

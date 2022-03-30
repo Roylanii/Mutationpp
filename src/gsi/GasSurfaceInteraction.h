@@ -171,6 +171,8 @@ public:
     //===========================================================================
     // add by zhangjingchao
 
+    void solveSurfaceGradient(double* p_dy, double* p_dT);
+
     void getSurfaceRes(double* const p_res);
 
     double computeGasFourierHeatFlux(const double* const v_T);

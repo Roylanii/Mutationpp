@@ -496,6 +496,12 @@ void NAME_MANGLE(solve_surface_balance)()
 }
 
 //==============================================================================
+void NAME_MANGLE(solve_surface_gradient)(double* p_dy, double* p_dT)
+{
+    p_mix->solveSurfaceGradient(p_dy,p_dT);
+}
+
+//==============================================================================
 void NAME_MANGLE(getsurfaceres)(double* const p_res)
 {
     p_mix->getSurfaceRes(p_res);

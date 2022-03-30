@@ -189,6 +189,20 @@ public:
 
 //==============================================================================
 // added by zhangjingchao
+
+    /**
+     * @brief solve SEB and SMB to compute balance mass fraction gradient
+     *  and tenmperature gradient
+     * 
+     * @param p_dy mass fraction gradient
+     * @param p_dT temperature gradient
+     */
+    virtual void solveSurfaceGradient(double*p_dy,double* p_dT)
+    {
+        throw LogicError()
+        << "solveSurfaceGradien can be called only when solving "
+        << "the surface balance!";
+    }
 // These virtual function are added to prevent calling from surface object
     
     /**
