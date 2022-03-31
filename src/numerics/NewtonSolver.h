@@ -200,7 +200,6 @@ T& NewtonSolver<T, Solver>::solve(T& x)
     if (std::isnan(resnorm))
     {
         cout << "Warning!!! Newton solver failed to convergence with residual: " << resnorm << endl;
-        cout << "Surface state is set to the unsolved state" ;
         x=x_unsolved;
     }
     return x;  
