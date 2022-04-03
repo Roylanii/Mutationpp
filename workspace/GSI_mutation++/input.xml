@@ -6,13 +6,13 @@
 	#mixture_name="seb_carbon_ablation"
 	#mixture_name="seb_carbon_ablation_catalysis"
 	mixture_name="seb_carbon"
-	pressure_init="28867.0977519450"
-	temperature_init="4448.392747145366"
+	pressure_init="2886.70977519450"
+	temperature_init="5448.392747145366"
 	distance="2.073572355442742E-006"
 	maxiterations="50"
 	subiterations="6"
 	pert_m="1e-1"
 	pert_T="1e-0"
 	resnorm="1e-5"
-	iNewtonhistory="true">
+	iNewtonhistory="1true">
 </input>

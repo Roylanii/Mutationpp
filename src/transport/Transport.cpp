@@ -819,6 +819,17 @@ double Transport::speciesThermalSpeed(const int& i) const
     return sqrt(8.0*RU*T/(PI*m_thermo.speciesMw(i)));
 }
 
+double Transport::speciesThermalSpeed2(const int& i) const
+{
+	if (i < m_thermo.hasElectrons()){
+	    const double T = m_thermo.Te();
+        return sqrt(m_thermo.speciesMw(i)/(TWOPI*RU*T));
+	}
+
+    const double T = m_thermo.T();
+    return sqrt(m_thermo.speciesMw(i)/(TWOPI*RU*T));
+}
+
 //==============================================================================
 double Transport::averageHeavyThermalSpeed()
 {

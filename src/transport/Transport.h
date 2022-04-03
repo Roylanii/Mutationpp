@@ -468,6 +468,10 @@ public:
     double electronMeanFreePath();
     /// Thermal speed of species i in m/s
     double speciesThermalSpeed(const int& i) const;
+    /// Thermal Speed used in Knudsen-Langmuir model
+    ///R. Baker. “Graphite Sublimation Chemistry Nonequilibrium Effects.”
+    ///AIAA Journal, 15(10):1391–1397, 1977.
+    double speciesThermalSpeed2(const int& i) const;
     /// Average heavy particle thermal speed of mixture in m/s.
     double averageHeavyThermalSpeed();
     /// Electron thermal speed of mixture in m/s.
