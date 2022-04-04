@@ -23,7 +23,7 @@
             <sublimationkl alpha="0.14" p_vap="85715" q_vap="18.69" />
     	</reaction>
 	<!-- 4 -->
-        <reaction type= "ablation" formula="2C-b => C3">
+        <reaction type= "ablation" formula="2C-b => C2">
             <sublimationkl alpha="0.26" p_vap="98363" q_vap="22.20" />
     	</reaction>
 	<!-- 5 -->

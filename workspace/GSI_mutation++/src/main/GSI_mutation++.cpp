@@ -177,26 +177,26 @@ int main(int argc, char *argv[])
     std::cout << "Surface mass properties" << std::endl;
     std::cout << setw(30) << "";
     for (int j = 0; j < ns; ++j)
-        std::cout << std::setw(16) << mix.speciesName(j);
+        std::cout << std::setw(15) << mix.speciesName(j);
     std::cout << std::endl;
 
     //species density
     std::cout << setw(30) << "Species density[kg/m^3]";
     for (int j = 0; j < ns; ++j)
-        std::cout << std::setw(16) << rhoi_s(j);
+        std::cout << std::setw(15) << rhoi_s(j);
     std::cout << std::endl;
     //chemical source
     std::cout << setw(30) << "Chemical production[kg/m^2-s]";
     for (int j = 0; j < ns; ++j)
-        std::cout << std::setw(16) << wdot(j);
+        std::cout << std::setw(15) << wdot(j);
     std::cout << std::endl;
     std::cout << setw(30) << "Surface species mole fraction";
     for (int j = 0; j < mix.nSpecies(); ++j)
-        std::cout << std::setw(16) << mix.X()[j];
+        std::cout << std::setw(15) << mix.X()[j];
     std::cout << std::endl;
     std::cout << setw(30) << "Edge species mole fraction";
     for (int j = 0; j < mix.nSpecies(); ++j)
-        std::cout << std::setw(16) << xi_e[j];
+        std::cout << std::setw(15) << xi_e[j];
     std::cout << std::endl;
 
     cout.precision(4);

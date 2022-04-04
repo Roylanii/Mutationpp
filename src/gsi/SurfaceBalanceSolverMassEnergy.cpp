@@ -237,8 +237,8 @@ void getSurfaceRes(double* const p_res)
             mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
         m_thermo.setState(
             mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
-        m_surf_state.setSurfaceState(
-            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        // m_surf_state.setSurfaceState(
+        //     mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
 
         // Changing to the solution variables
         // computeMoleFracfromPartialDens(mv_rhoi, mv_X.tail(m_nT), mv_X);
@@ -331,6 +331,10 @@ void getSurfaceRes(double* const p_res)
         // errorUninitializedDiffusionModel
         errorSurfaceStateNotSet();
         mv_f.setZero();
+        //先计算壁面参数下的残差作为初速值,试图引入负反馈加速残差收敛
+        Eigen::VectorXd v_res(m_neqns);
+        getSurfaceRes(v_res.data());
+        mv_f = v_res;
 
     	// Getting the state
         mv_rhoi = m_surf_state.getSurfaceRhoi();
@@ -341,8 +345,8 @@ void getSurfaceRes(double* const p_res)
             mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
         m_thermo.setState(
             mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
-        m_surf_state.setSurfaceState(
-            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        // m_surf_state.setSurfaceState(
+        //     mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
 
         computeSurfaceReactionRates(mv_surf_reac_rates);
         mv_f.head(m_ns) -= mv_surf_reac_rates;
@@ -353,6 +357,7 @@ void getSurfaceRes(double* const p_res)
         Eigen::VectorXd v_di(m_ns);
         mp_diff_vel_calc->getDiffuisonCoe(v_di);
         // applyTolerance(v_di);
+        // mv_f没有取负号因为组分扩散梯度是-v_di*rho*dy
         v_dy = mv_f.head(m_ns).cwiseQuotient(v_di)/mv_rhoi.sum();
         mv_Vdiff = -v_di.cwiseProduct(v_dy);
 
@@ -376,6 +381,7 @@ void getSurfaceRes(double* const p_res)
             std::cout << "multi temperature is not aviliable now";
             exit;
         }
+         // mv_f没有取负号因为温度梯度是-v_lambda*dtdn
         v_dT(pos_T_trans) = mv_f(pos_E)/v_lambda(pos_T_trans);
         for (int i_s = 0; i_s < m_ns; i_s++)
             p_dy[i_s] = v_dy(i_s);
