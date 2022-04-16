@@ -104,20 +104,21 @@ int main(int argc, char *argv[])
     // Get surface production rates
     VectorXd wdot(ns);
     mix.setSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
-    Eigen::VectorXd v_dy(ns);
-    Eigen::VectorXd v_dt(nT);
-    mix.solveSurfaceGradient(v_dy.data(),v_dt.data());
-    std::cout << "v_dy=" << v_dy<<std::endl;
-    std::cout << "v_dt=" << v_dt<<std::endl;
-    Eigen::VectorXd res(neq);
-    mix.getSurfaceRes(res.data());
-    std::cout << "res=" << res<<std::endl;
+    // Eigen::VectorXd v_dy(ns);
+    // Eigen::VectorXd v_dt(nT);
+    // mix.solveSurfaceGradient(v_dy.data(),v_dt.data());
+    // std::cout << "v_dy=" << v_dy<<std::endl;
+    // std::cout << "v_dt=" << v_dt<<std::endl;
+    // Eigen::VectorXd res(neq);
+    // mix.getSurfaceRes(res.data());
+    // std::cout << "res=" << res<<std::endl;
+
+    double mblow;
+    // Blowing flux (should be zero for catalysis)
+    mix.getMassBlowingRate(mblow);
 
     mix.surfaceReactionRates(wdot.data());
 
-    // Blowing flux (should be zero for catalysis)
-    double mblow;
-    mix.getMassBlowingRate(mblow);
 
     // Species and mixture enthalpies
     VectorXd v_hi(ns * nT);

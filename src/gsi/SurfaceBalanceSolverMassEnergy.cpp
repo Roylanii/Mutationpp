@@ -332,9 +332,9 @@ void getSurfaceRes(double* const p_res)
         errorSurfaceStateNotSet();
         mv_f.setZero();
         //先计算壁面参数下的残差作为初速值,试图引入负反馈加速残差收敛
-        Eigen::VectorXd v_res(m_neqns);
-        getSurfaceRes(v_res.data());
-        mv_f = v_res;
+        // Eigen::VectorXd v_res(m_neqns);
+        // getSurfaceRes(v_res.data());
+        // mv_f = v_res;
 
     	// Getting the state
         mv_rhoi = m_surf_state.getSurfaceRhoi();

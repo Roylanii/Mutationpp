@@ -1,0 +1,15 @@
+<mixture mechanism="none"
+         thermo_db="NASA-9"
+         state_model="ChemNonEq1T"
+	gsi_mechanism="carbon_mutationpp">
+
+    <species>
+        N2 O2 NO C3 CO2 C2 CO CN N O C
+    </species>
+
+    <element_compositions default="air">
+	<composition name="air"> N:0.79, O:0.21 </composition>
+        <composition name="Gas"> N2:0.811217531068261, O2:0.188782468931739, NO:0.0, C3:0.0, CO2:0.0, C2:0.0, CO:0.0, CN:0.0, N:0.0, O:0.0, C:0.0 </composition>
+    </element_compositions>
+
+</mixture>

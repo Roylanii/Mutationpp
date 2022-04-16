@@ -82,7 +82,6 @@ public:
 
         double sp_thermal_speed = m_transport.speciesThermalSpeed2(
                                       mv_prod[idx_gas_prod]);
-
         return (sat_vap_p - ps)*m_alpha*sp_thermal_speed;
     }
 
