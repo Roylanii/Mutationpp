@@ -21,7 +21,7 @@ docs/html/
 _skbuild/
 *.whl
 *.mod
-
+*.o
 # OS specifics
 .DS_Store
 
