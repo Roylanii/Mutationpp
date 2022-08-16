@@ -29,9 +29,9 @@ subroutine setDefaultInput
     use input
     implicit none 
     m_input_file="input.xml"
-    m_data_directory=""
-    m_working_directory="/D/gitee/Mutation/Mutationpp/workspace/GSI_mutation++/data"
-    m_working_directory=""
+    m_data_directory="/D/gitee/Mutationpp/workspace/data"
+    m_working_directory="/D/gitee/Mutationpp/workspace/data"
+    ! m_working_directory=""
     m_mixture_name = ""
     m_pressure_init = 101325;
     m_temperature_init = 3000;

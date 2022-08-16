@@ -51,41 +51,57 @@ program main
     !boundary edge composition can be given by input
     !call mpp_get_species_composition("Gas",xi_e)
     call mpp_set_diffusion_model(xi_e, m_distance)
+    write(*,"(A6,11ES18.8)") "xi_e",xi_e
+    !Initial conditions of the surface are the ones in the first physical cell
+    call mpp_species_densities(rhoi_s)
+    write(*,"(A6,11ES18.8)") "rhoi_e",rhoi_s
+
 
     !set heat gradient if needed
     T_e = m_temperature_init
     if (m_gsi_mechism == "phenomenological_mass_energy") then
         call mpp_set_heatmodel_t(T_e, m_distance)
+        write(*,"(A6,F13.6)") "T_e",T_e
     end if
 
-    !Initial conditions of the surface are the ones in the first physical cell
-    call mpp_species_densities(rhoi_s)
     T_s = m_temperature_init
     call mpp_set_surface_state(rhoi_s, T_s, set_state_with_rhoi_T)
-
+    if (.true.) then 
+        call mpp_solve_surface_gradient(dxidx, dtdx)
+        write(*,*) "surface gradient:",dxidx,dtdx
+    endif
     ! Solve balance and request solution
     call mpp_solve_surface_balance()
     call mpp_get_surface_state(rhoi_s, T_s, set_state_with_rhoi_T)
     rho = sum(rhoi_s)
+    write(*,"(A6,11ES18.8)") "rhoi_s",rhoi_s/rho
+    write(*,"(A6,F13.6)") "T_s",T_s
 
     ! Verifying the solution gives low residual in the balance equations
     call mpp_set_state(rhoi_s, T_s, set_state_with_rhoi_T)
-    call mpp_x(xi_s)
-
-    ! compute diffusion velocities
+    
+    ! compute diffusion velocities with stefenmaxwell
+    ! call mpp_x(xi_s)
     ! dxidx = (xi_s - xi_e)/m_distance; 
     ! E = 0.0
     ! call mpp_stefan_maxwell(dxidx, vdi, E)
     xi_s = rhoi_s/rho
     call mpp_compute_diffusion_velocity(xi_s,vdi)
+    ! write(*,*) xi_s,vdi
+    dxidx = (xi_s - xi_e)/m_distance
+    dtdx = (T_s - T_e)/m_distance
+    write(*,*) "input gradient:",dxidx,dtdx
+
 
     ! compute heat flux
     if (m_gsi_mechism == "phenomenological_mass_energy") then
-        !dtdx = (T_s - T_e)/m_distance
-        !call mpp_frozen_thermal_conductivity(lambda)
-        !q_gcon = lambda*dtdx
+        ! dtdx = (T_s - T_e)/m_distance
+        ! call mpp_frozen_thermal_conductivity(lambda)
+        ! q_gcon = -lambda*dtdx
+        ! write(*,*) dtdx,q_gcon
         !gas heat flux can be calculated by (-lambda*dtdx=q_gcon>0) or function below, just for validation
         call mpp_compute_gas_heat_flux(T_s,q_gcon)
+        ! write(*,*) q_gcon
     end if
 
     ! Get surface production rates
@@ -140,33 +156,33 @@ program main
 
     write (*, "(A30)", advance='no') "Surface mass properties"
     do i = 1, ns
-        write (*, '(5X,A13)', advance='no') species_name(i)
+        write (*, '(3X,A13)', advance='no') species_name(i)
     end do
     write (*, *)
 
     ! species density
     write (*, "(A30)", advance='no') "Species density[kg/m^3]"
     do i = 1, ns
-        write (*, "(E18.6)", advance='no') rhoi_s(i)
+        write (*, "(ES16.6)", advance='no') rhoi_s(i)
     end do
     write (*, *)
 
     ! chemical source
     write (*, "(A30)", advance='no') "Chemical production[kg/m^2-s]"
     do i = 1, ns
-        write (*, "(E18.6)", advance='no') wdot(i)
+        write (*, "(ES16.6)", advance='no') wdot(i)
     end do
     write (*, *)
 
     write (*, "(A30)", advance='no') "Surface species mole fraction"
     do i = 1, ns
-        write (*, "(E18.6)", advance='no') xi_s(i)
+        write (*, "(ES16.6)", advance='no') xi_s(i)
     end do
     write (*, *)
 
     write (*, "(A30)", advance='no') "Edge species mole fraction"
     do i = 1, ns
-        write (*, "(E18.6)", advance='no') xi_e(i)
+        write (*, "(ES16.6)", advance='no') xi_e(i)
     end do
     write (*, *)
 
