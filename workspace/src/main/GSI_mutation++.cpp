@@ -61,13 +61,22 @@ int main(int argc, char *argv[])
 
     // Initial conditions of the surface are the ones in the first
     // physical cell
+    // VectorXd rhoi_s(ns);
+    // mix.densities(rhoi_s.data());
+    // VectorXd T_s = VectorXd::Constant(nT, (T_init ));
+    // mix.setSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
+    // Solve balance and request solution
+    // mix.solveSurfaceBalance();
+
+    //solve qcond,计算壁面温度加热条件下烧蚀壁面内部的热传导量
     VectorXd rhoi_s(ns);
     mix.densities(rhoi_s.data());
-    VectorXd T_s = VectorXd::Constant(nT, (T_init ));
+    VectorXd T_s = VectorXd::Constant(nT, 2000.0);
     mix.setSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
+    VectorXd dydn(ns);
+    double qcond;
+    mix.solveSurfaceQcond(dydn.data(),&qcond);
 
-    // Solve balance and request solution
-    mix.solveSurfaceBalance();
     mix.getSurfaceState(rhoi_s.data(), T_s.data(), set_state_with_rhoi_T);
     double rho = rhoi_s.sum();
 
@@ -85,15 +94,20 @@ int main(int argc, char *argv[])
     // mix.stefanMaxwell(dxidx.data(), vdi.data(), E);
     // std::cout <<"stefanmaxwell"<<vdi.cwiseProduct(rhoi_s)<<std::endl;
     xi_s = rhoi_s/rhoi_s.sum();
-    mix.comSurfaceDiffusionVelocity(xi_s.data(),vdi.data());
+    // mix.comSurfaceDiffusionVelocity(xi_s.data(),vdi.data());
+
+    //计算固体热流时由于满足SMB得出了组分扩散梯度,故扩散速度不能用mix.comSurfaceDiffusionVelocity计算
+    mix.comSurfaceDiffusionCoe(xi_s.data());
+    vdi=-xi_s.cwiseProduct(dydn);
+
     // std::cout <<"Dim"<<rhoi_s.sum() * vdi<<std::endl;
 
     // Conductive heat flux
     VectorXd gas_conduction(nT);
     if (mix.getGSIMechanism() == "phenomenological_mass_energy")
     {
-        
         gas_conduction(pos_T_trans) = mix.computeGasFourierHeatFlux(T_s.data());
+        std::cout << "T_s " << T_s <<" "<< gas_conduction(pos_T_trans);
         // VectorXd dTdx(nT);
         // VectorXd lambda(nT);
         // dTdx = (T_s - T_e) / dx;
@@ -138,7 +152,9 @@ int main(int argc, char *argv[])
 
     //solid conduction
     VectorXd solid_conduction(nT);
-    solid_conduction(pos_T_trans) = mix.computeSolidHeat();
+    // solid_conduction(pos_T_trans) = mblow * mix.computeSolidHeat();
+    //固体热传导用上面计算的qcond
+    solid_conduction(pos_T_trans) = qcond;
 
     // Building balance functions
     VectorXd F(ns);
@@ -216,8 +232,8 @@ int main(int argc, char *argv[])
         std::cout << std::setw(22) << (gas_conduction(j));
         std::cout << std::setw(18) << (-q_srad(j));
         std::cout << std::setw(18) << (mblow * v_h(j));
-        std::cout << std::setw(18) << (-v_hi_rhoi_vi(j));
-        std::cout << std::setw(26) << (mblow * solid_conduction(j));
+        std::cout << std::setw(18) << (v_hi_rhoi_vi(j));
+        std::cout << std::setw(26) << (solid_conduction(j));
         std::cout << std::endl;
     }
 

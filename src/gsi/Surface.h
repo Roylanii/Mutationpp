@@ -190,6 +190,7 @@ public:
 //==============================================================================
 // added by zhangjingchao
 
+// These virtual function are added to prevent calling from surface object
     /**
      * @brief solve SEB and SMB to compute balance mass fraction gradient
      *  and tenmperature gradient
@@ -203,7 +204,18 @@ public:
         << "solveSurfaceGradien can be called only when solving "
         << "the surface balance!";
     }
-// These virtual function are added to prevent calling from surface object
+    /**
+     * @brief solve SEB and SMB to compute balance solid heat conduction
+     * 
+     * @param p_dy mass fraction gradient
+     * @param p_qcond temperature gradient
+     */
+    virtual void solveSurfaceQcond(double*p_dy,double* p_qcond)
+    {
+        throw LogicError()
+        << "solveSurfaceQcond can be called only when solving "
+        << "the surface balance!";
+    }
     
     /**
      * @brief Get the Surface Residual with the given surface state
@@ -300,6 +312,15 @@ public:
         {
         throw LogicError()
             << "comSurfaceDiffusionVelocity can be called only when solving "
+            << "the surface energy balance!";
+    }
+    }
+
+    virtual void comSurfaceDiffusionCoe(double* v_dif)
+    {
+        {
+        throw LogicError()
+            << "comSurfaceDiffusionCoe can be called only when solving "
             << "the surface energy balance!";
     }
     }

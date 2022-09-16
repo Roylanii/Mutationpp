@@ -502,6 +502,12 @@ void NAME_MANGLE(solve_surface_gradient)(double* p_dy, double* p_dT)
 }
 
 //==============================================================================
+void NAME_MANGLE(solve_surface_qcond)(double* p_dy, double* p_qcond)
+{
+    p_mix->solveSurfaceQcond(p_dy,p_qcond);
+}
+
+//==============================================================================
 void NAME_MANGLE(getsurfaceres)(double* const p_res)
 {
     p_mix->getSurfaceRes(p_res);
@@ -667,6 +673,11 @@ void NAME_MANGLE(compute_gas_heat_const)(double *heat_T)
 void NAME_MANGLE(compute_diffusion_velocity)(double* v_x, double* vdi)
 {
     p_mix->comSurfaceDiffusionVelocity(v_x,vdi);
+}
+
+void NAME_MANGLE(compute_diffusion_coefficient)(double* v_dif)
+{
+    p_mix->comSurfaceDiffusionCoe(v_dif);
 }
 
 void NAME_MANGLE(get_species_composition)(F_STRING comp,double* p_vec,F_STRLEN comp_length)

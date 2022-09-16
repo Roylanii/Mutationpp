@@ -112,7 +112,7 @@ void DiffusionVelocityCalculator::computeDiffusionVelocitiesYi(
     v_diff_velocities = -di.cwiseProduct(mv_dxidx);
 }
 
-void DiffusionVelocityCalculator::getDiffuisonCoe(Eigen::VectorXd& v_di)
+void DiffusionVelocityCalculator::getDiffusionCoe(Eigen::VectorXd& v_di)
 {
     m_transport.averageDiffusionCoeffs(v_di.data());
 }

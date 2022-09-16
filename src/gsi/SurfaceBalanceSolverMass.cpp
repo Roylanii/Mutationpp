@@ -176,6 +176,16 @@ public:
         }
     }
 
+    void comSurfaceDiffusionCoe(double* v_dif)
+    {
+        Eigen::VectorXd vdi(m_ns);
+        mp_diff_vel_calc->getDiffusionCoe(vdi);
+        for (int i_s = 0; i_s < m_ns; i_s++)
+        {
+            v_dif[i_s] = vdi(i_s);
+        }
+    }
+
 //=============================================================================
 
     void solveSurfaceBalance()
@@ -220,7 +230,7 @@ public:
         mv_f.head(m_ns) += mv_rhoi*mass_blow/mv_rhoi.sum();
 
         Eigen::VectorXd v_di(m_ns);
-        mp_diff_vel_calc->getDiffuisonCoe(v_di);
+        mp_diff_vel_calc->getDiffusionCoe(v_di);
         applyTolerance(v_di);
         v_dy = mv_f.head(m_ns).cwiseQuotient(v_di)/mv_rhoi.sum();
 

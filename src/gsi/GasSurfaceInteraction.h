@@ -173,6 +173,8 @@ public:
 
     void solveSurfaceGradient(double* p_dy, double* p_dT);
 
+    void solveSurfaceQcond(double* p_dy, double* p_qcond);
+
     void getSurfaceRes(double* const p_res);
 
     double computeGasFourierHeatFlux(const double* const v_T);
@@ -218,6 +220,8 @@ public:
     double computeSolidHeat();
 
     void comSurfaceDiffusionVelocity(const double* const v_x, double* vdi);
+
+    void comSurfaceDiffusionCoe(double* v_dif);
 
     //added by zhangjingchao, end
 

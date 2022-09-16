@@ -212,6 +212,10 @@ void GasSurfaceInteraction::solveSurfaceGradient(double* p_dy, double* p_dT)
 {
     mp_surf->solveSurfaceGradient(p_dy, p_dT);
 }
+void GasSurfaceInteraction::solveSurfaceQcond(double* p_dy, double* p_qcond)
+{
+    mp_surf->solveSurfaceQcond(p_dy, p_qcond);
+}
 
 void GasSurfaceInteraction::getSurfaceRes(double* const p_res)
 {
@@ -273,6 +277,11 @@ void GasSurfaceInteraction::comSurfaceDiffusionVelocity(const double* const v_x,
     
     mp_surf->comSurfaceDiffusionVelocity(Map<const VectorXd>(
         v_x, m_thermo.nSpecies()),vdi);
+}
+
+void GasSurfaceInteraction::comSurfaceDiffusionCoe(double* v_dif) {
+    
+    mp_surf->comSurfaceDiffusionCoe(v_dif);
 }
 
 double GasSurfaceInteraction::computeSolidHeat()
