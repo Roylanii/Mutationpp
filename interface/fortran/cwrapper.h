@@ -534,6 +534,11 @@ void NAME_MANGLE(initializegsi)(
 void NAME_MANGLE(globaloptionsworkingdir)(
     F_STRING workingdir, F_STRLEN workingdir_length);
 
+void NAME_MANGLE(globaloptionsdatadir)(
+    F_STRING datadir, F_STRLEN datadir_length);
+void NAME_MANGLE(getdatadir)(
+    F_STRING datadir, F_STRLEN datadir_length);
+
 void NAME_MANGLE(getworkingdir)(
     F_STRING workingdir, F_STRLEN sorkingdir_length);
 

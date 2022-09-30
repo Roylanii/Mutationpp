@@ -1,4 +1,4 @@
-#
+#   
 # Copyright 2014-2020 von Karman Institute for Fluid Dynamics (VKI)
 #
 # This file is part of MUlticomponent Thermodynamic And Transport
@@ -41,7 +41,9 @@ get_property(mutation++_SRCS GLOBAL PROPERTY mutation++_SRCS)
 if (SKBUILD)
     add_library(mutation++ OBJECT ${mutation++_SRCS})
 else()
+#切换静态编译或动态编译
     # add_library(mutation++ STATIC ${mutation++_SRCS})
+    # add_library(mutation++ OBJECT ${mutation++_SRCS})
     add_library(mutation++ SHARED ${mutation++_SRCS})
     add_library(mutation++::mutation++ ALIAS mutation++)
 endif()

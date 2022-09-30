@@ -564,9 +564,18 @@ void NAME_MANGLE(globaloptionsworkingdir)(F_STRING workingdir, F_STRLEN workingd
     Mutation::GlobalOptions::workingDirectory(char_to_string(workingdir, workingdir_length));
 }
 
+void NAME_MANGLE(globaloptionsdatadir)(F_STRING datadir, F_STRLEN datadir_length)
+{
+    Mutation::GlobalOptions::dataDirectory(char_to_string(datadir, datadir_length));
+}
+
 void NAME_MANGLE(getworkingdir)(F_STRING workingdir, F_STRLEN workingdir_length)
 {
     string_to_char(Mutation::GlobalOptions::workingDirectory(), workingdir, workingdir_length);
+}
+void NAME_MANGLE(getdatadir)(F_STRING datadir, F_STRLEN datadir_length)
+{
+    string_to_char(Mutation::GlobalOptions::dataDirectory(), datadir, datadir_length);
 }
 
 void NAME_MANGLE(loadstringfromfile)(

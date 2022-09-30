@@ -187,6 +187,7 @@ protected:
 Utilities::Config::ObjectProvider<Nasa9DB, ThermoDB> nasa9DB("NASA-9");
 
 
+
 /**
  * @brief Adds support for the new NASA-9 polynomial formatted database.
  * 
