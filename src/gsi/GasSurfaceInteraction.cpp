@@ -216,6 +216,10 @@ void GasSurfaceInteraction::solveSurfaceQcond(double* p_dy, double* p_qcond)
 {
     mp_surf->solveSurfaceQcond(p_dy, p_qcond);
 }
+void GasSurfaceInteraction::solveSurfacePyrQcond(double* p_mp, double* p_dy, double* p_qcond)
+{
+    mp_surf->solveSurfacePyrQcond(p_mp, p_dy, p_qcond);
+}
 
 void GasSurfaceInteraction::getSurfaceRes(double* const p_res)
 {

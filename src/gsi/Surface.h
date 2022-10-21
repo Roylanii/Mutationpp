@@ -216,6 +216,18 @@ public:
         << "solveSurfaceQcond can be called only when solving "
         << "the surface balance!";
     }
+    /**
+     * @brief solve SEB and SMB to compute balance solid heat conduction with pyrolysis gas production rate
+     * @param p_mp pyrolysis gas production rate
+     * @param p_dy mass fraction gradient
+     * @param p_qcond temperature gradient
+     */
+    virtual void solveSurfacePyrQcond(double* p_mp, double*p_dy,double* p_qcond)
+    {
+        throw LogicError()
+        << "solveSurfacePyrQcond can be called only when solving "
+        << "the surface balance!";
+    }
     
     /**
      * @brief Get the Surface Residual with the given surface state

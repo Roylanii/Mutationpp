@@ -175,6 +175,8 @@ public:
 
     void solveSurfaceQcond(double* p_dy, double* p_qcond);
 
+    void solveSurfacePyrQcond(double* p_mp, double* p_dy, double* p_qcond);
+
     void getSurfaceRes(double* const p_res);
 
     double computeGasFourierHeatFlux(const double* const v_T);

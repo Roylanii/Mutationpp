@@ -429,6 +429,7 @@ void getSurfaceRes(double* const p_res)
         mv_Vdiff = -v_di.cwiseProduct(v_dy);
 
         // 设置好壁面加热,计算壁面热流,不再用定常烧蚀假设近似固体热传导量
+        // 璧面热流，-lambda dtdx，传入烧蚀层的热量为正，离开为负
         mv_f(pos_E) +=mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));
         m_thermo.getEnthalpiesMass(mv_hi.data());
         double hmix = m_thermo.mixtureHMass();
@@ -442,8 +443,78 @@ void getSurfaceRes(double* const p_res)
 
         for (int i_s = 0; i_s < m_ns; i_s++)
             p_dy[i_s] = v_dy(i_s);
-        //当满足SEB时,壁面加热量的残差应该等于固体热传导,乘以负号,因为固体热传导为负数离开烧蚀层
-        *p_qcond = -mv_f(pos_E);
+        //当满足SEB时,壁面加热量的残差应该等于固体热传导,不乘以负号,因为固体热传导为负数离开烧蚀层
+        *p_qcond = mv_f(pos_E);
+        //验证算例
+        // std::cout << "qcond "<< *p_qcond << " radiation " << -mp_surf_rad->surfaceNetRadiativeHeatFlux() << "blow" << hmix*mass_blow <<
+        // "diffusion" << mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum()) << "gas conduct " << mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));
+    }
+
+    void solveSurfacePyrQcond(double* p_mp, double* p_dy, double* p_qcond)
+    {
+        Eigen::VectorXd v_dy(m_ns);
+        double solidheat;
+        // errorUninitializedDiffusionModel
+        errorSurfaceStateNotSet();
+        mv_f.setZero();
+        //先计算壁面参数下的残差作为初速值,试图引入负反馈加速残差收敛
+        // Eigen::VectorXd v_res(m_neqns);
+        // getSurfaceRes(v_res.data());
+        // mv_f = v_res;
+        Eigen::VectorXd v_mp(m_ns);
+        for (int i_s = 0; i_s < m_ns; i_s++)
+            v_mp(i_s) = p_mp[i_s];
+    	// Getting the state
+        mv_rhoi = m_surf_state.getSurfaceRhoi();
+        mv_X.tail(m_nT) = m_surf_state.getSurfaceT();
+
+        // Impose equilibrium
+        if (is_surf_in_thermal_eq)
+            mv_X.tail(m_nT-1).setConstant(mv_X(pos_E));
+        m_thermo.setState(
+            mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        // 壁面状态必须先设置好,组分密度和温度都是取自壁面状态
+        // m_surf_state.setSurfaceState(
+        //     mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
+        // 用pyrolysis production rate 作为质量残差的初始值
+        for (int i_s = 0; i_s < m_ns; i_s++)
+            mv_f(i_s) += p_mp[i_s];
+        //chemical reaction mass flux
+        computeSurfaceReactionRates(mv_surf_reac_rates);
+        mv_f.head(m_ns) -= mv_surf_reac_rates;
+        //mass blowing flux
+        double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
+            mv_surf_reac_rates);
+
+        // massblow 是所有的化学反应生成速率，如果考虑内部的pyrolysis反应，直接加上\rho_p * u_p
+        //mass_blow是一个负数，代表离开
+        mass_blow -= v_mp.sum();
+
+        mv_f.head(m_ns) += mv_rhoi*mass_blow/mv_rhoi.sum();
+        //diffusion mass flux
+        Eigen::VectorXd v_di(m_ns);
+        mp_diff_vel_calc->getDiffusionCoe(v_di);
+        // applyTolerance(v_di);
+        // mv_f没有取负号因为组分扩散梯度是-v_di*rho*dy
+        v_dy = mv_f.head(m_ns).cwiseQuotient(v_di)/mv_rhoi.sum();
+        mv_Vdiff = -v_di.cwiseProduct(v_dy);
+
+        // 设置好壁面加热,计算壁面热流,不再用定常烧蚀假设近似固体热传导量
+        mv_f(pos_E) +=mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));
+        m_thermo.getEnthalpiesMass(mv_hi.data());
+        double hmix = m_thermo.mixtureHMass();
+        //用pyr的速率乘以焓
+        mv_f(pos_E) += mv_hi.head(m_ns).dot(v_mp);
+           mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum());
+        mv_f(pos_E) += hmix*mass_blow;
+         // Radiation
+        if (mp_surf_rad != NULL)
+            mv_f(pos_E) -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
+
+        for (int i_s = 0; i_s < m_ns; i_s++)
+            p_dy[i_s] = v_dy(i_s);
+        //当满足SEB时,壁面加热量的残差应该等于固体热传导,不乘以负号,因为固体热传导为负数离开烧蚀层，所以残差等于固体热传导
+        *p_qcond = mv_f(pos_E);
         //验证算例
         // std::cout << "qcond "<< *p_qcond << " radiation " << -mp_surf_rad->surfaceNetRadiativeHeatFlux() << "blow" << hmix*mass_blow <<
         // "diffusion" << mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum()) << "gas conduct " << mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));

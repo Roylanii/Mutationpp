@@ -508,6 +508,12 @@ void NAME_MANGLE(solve_surface_qcond)(double* p_dy, double* p_qcond)
 }
 
 //==============================================================================
+void NAME_MANGLE(solve_surface_pyr_qcond)(double* p_mp, double* p_dy, double* p_qcond)
+{
+    p_mix->solveSurfacePyrQcond(p_mp, p_dy,p_qcond);
+}
+
+//==============================================================================
 void NAME_MANGLE(getsurfaceres)(double* const p_res)
 {
     p_mix->getSurfaceRes(p_res);
