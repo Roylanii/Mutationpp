@@ -42,9 +42,9 @@ if (SKBUILD)
     add_library(mutation++ OBJECT ${mutation++_SRCS})
 else()
 #切换静态编译或动态编译
-    add_library(mutation++ STATIC ${mutation++_SRCS})
+    # add_library(mutation++ STATIC ${mutation++_SRCS})
     # add_library(mutation++ OBJECT ${mutation++_SRCS})
-    # add_library(mutation++ SHARED ${mutation++_SRCS})
+    add_library(mutation++ SHARED ${mutation++_SRCS})
     add_library(mutation++::mutation++ ALIAS mutation++)
 endif()
 
