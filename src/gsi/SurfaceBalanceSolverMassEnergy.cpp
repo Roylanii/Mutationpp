@@ -425,6 +425,7 @@ void getSurfaceRes(double* const p_res)
         mp_diff_vel_calc->getDiffusionCoe(v_di);
         // applyTolerance(v_di);
         // mv_f没有取负号因为组分扩散梯度是-v_di*rho*dy
+        //得到的v——dy为璧面的组分百分数减去外流场的组分百分数
         v_dy = mv_f.head(m_ns).cwiseQuotient(v_di)/mv_rhoi.sum();
         mv_Vdiff = -v_di.cwiseProduct(v_dy);
 
@@ -443,8 +444,8 @@ void getSurfaceRes(double* const p_res)
 
         for (int i_s = 0; i_s < m_ns; i_s++)
             p_dy[i_s] = v_dy(i_s);
-        //当满足SEB时,壁面加热量的残差应该等于固体热传导,不乘以负号,因为固体热传导为负数离开烧蚀层
-        *p_qcond = mv_f(pos_E);
+        //当满足SEB时,壁面加热量的残差应该等于固体热传导,乘以负号,因为固体热传导为负数离开烧蚀层
+        *p_qcond = -mv_f(pos_E);
         //验证算例
         // std::cout << "qcond "<< *p_qcond << " radiation " << -mp_surf_rad->surfaceNetRadiativeHeatFlux() << "blow" << hmix*mass_blow <<
         // "diffusion" << mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum()) << "gas conduct " << mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));
@@ -513,8 +514,8 @@ void getSurfaceRes(double* const p_res)
 
         for (int i_s = 0; i_s < m_ns; i_s++)
             p_dy[i_s] = v_dy(i_s);
-        //当满足SEB时,壁面加热量的残差应该等于固体热传导,不乘以负号,因为固体热传导为负数离开烧蚀层，所以残差等于固体热传导
-        *p_qcond = mv_f(pos_E);
+        //当满足SEB时,壁面加热量的残差应该等于固体热传导,乘以负号,因为固体热传导为负数离开烧蚀层，所以残差等于固体热传导
+        *p_qcond = -mv_f(pos_E);
         //验证算例
         // std::cout << "qcond "<< *p_qcond << " radiation " << -mp_surf_rad->surfaceNetRadiativeHeatFlux() << "blow" << hmix*mass_blow <<
         // "diffusion" << mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum()) << "gas conduct " << mp_gas_heat_flux_calc->computeGasFourierHeatFlux(mv_X.tail(m_nT));

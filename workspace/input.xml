@@ -7,7 +7,7 @@
 	#mixture_name="seb_carbon_ablation_catalysis"
 	mixture_name="carbon_mutationpp"
 	pressure_init="7886.70977519450"
-	temperature_init="3288.392747145366"
+	temperature_init="1588.392747145366"
 	distance="2.073572355442742E-004"
 	maxiterations="30"
 	subiterations="6"
