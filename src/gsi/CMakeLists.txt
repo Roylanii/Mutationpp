@@ -26,6 +26,7 @@ add_sources(mutation++
     GSIReactionAblation.cpp
     GSIReactionCatalysis.cpp
     GSIRateLawGammaConst.cpp
+    GSIRateLawGammaCatalytic.cpp
     GSIRateLawGammaT.cpp
     GSIRateLawGammaT2.cpp
     GSIRateLawSublimation.cpp

@@ -48,5 +48,5 @@
         </reaction>
     </surface_chemistry>
 
-    <surface_radiation emissivity="0.86" T_env="0."/>
+    <surface_radiation1 emissivity="0.86" T_env="0."/>
 </gsi>

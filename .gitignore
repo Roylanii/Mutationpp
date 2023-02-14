@@ -1,6 +1,8 @@
 # Build directories
 build/
+build1/
 install/
+install1/
 obj_c
 obj_f
 
