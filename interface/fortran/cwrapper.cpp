@@ -653,6 +653,11 @@ void NAME_MANGLE(setiterationseps)(double *tol)
     p_mix->setIterationsEps(*tol);
 }
 
+void NAME_MANGLE(setiterationsdeps)()
+{
+    return;
+}
+
 double NAME_MANGLE(getsurfaceradiativeheatflux)()
 {
     return p_mix->getSurfaceRadiativeHeatFlux();

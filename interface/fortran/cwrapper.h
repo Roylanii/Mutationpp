@@ -569,6 +569,8 @@ void NAME_MANGLE(setiterationspert_t)(double *pert_T);
 
 void NAME_MANGLE(setiterationseps)(double *tol);
 
+void NAME_MANGLE(setiterationsdeps)();
+
 double NAME_MANGLE(getsurfaceradiativeheatflux)();
 
 void NAME_MANGLE(setiterationshistory)(F_STRING iof, F_STRLEN iof_length);
