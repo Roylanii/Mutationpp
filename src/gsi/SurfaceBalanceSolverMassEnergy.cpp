@@ -347,7 +347,6 @@ void getSurfaceRes(double* const p_res)
             mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
         // m_surf_state.setSurfaceState(
         //     mv_rhoi.data(), mv_X.tail(m_nT).data(), set_state_with_rhoi_T);
-
         computeSurfaceReactionRates(mv_surf_reac_rates);
         mv_f.head(m_ns) -= mv_surf_reac_rates;
         double mass_blow = mp_mass_blowing_rate->computeBlowingFlux(
@@ -365,27 +364,26 @@ void getSurfaceRes(double* const p_res)
         mv_f(pos_E) += solid_heat;
         m_thermo.getEnthalpiesMass(mv_hi.data());
         double hmix = m_thermo.mixtureHMass();
-
         mv_f(pos_E) +=
            mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum());
         mv_f(pos_E) += hmix*mass_blow;
          // Radiation
         if (mp_surf_rad != NULL)
             mv_f(pos_E) -= mp_surf_rad->surfaceNetRadiativeHeatFlux();
-
         Eigen::VectorXd v_lambda(m_nT);
         mp_gas_heat_flux_calc->computeGasConductivity(v_lambda);
-
-        if (m_nT !=1 )
-        {
-            std::cout << "multi temperature is not aviliable now";
-            exit;
-        }
+        // 假定璧面处于热力学平衡态,振动温度的梯度等于平动温度的梯度,
+        // if (m_nT !=1 )
+        // {
+        //     std::cout << "multi temperature is not aviliable now";
+        //     exit;
+        // }
          // mv_f没有取负号因为温度梯度是-v_lambda*dtdn
-        v_dT(pos_T_trans) = mv_f(pos_E)/v_lambda(pos_T_trans);
         for (int i_s = 0; i_s < m_ns; i_s++)
             p_dy[i_s] = v_dy(i_s);
-        for (int i_s = 0; i_s < m_nT; i_s++)
+        for (int i_s = 0; i_s < 1; i_s++)
+            p_dT[i_s] = v_dT(i_s);
+        for (int i_s = 1; i_s < m_nT; i_s++)
             p_dT[i_s] = v_dT(i_s);
     }
 
