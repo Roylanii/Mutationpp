@@ -379,6 +379,7 @@ void getSurfaceRes(double* const p_res)
         //     exit;
         // }
          // mv_f没有取负号因为温度梯度是-v_lambda*dtdn
+        v_dT(pos_T_trans) = mv_f(pos_E)/v_lambda(pos_T_trans);
         for (int i_s = 0; i_s < m_ns; i_s++)
             p_dy[i_s] = v_dy(i_s);
         for (int i_s = 0; i_s < 1; i_s++)
