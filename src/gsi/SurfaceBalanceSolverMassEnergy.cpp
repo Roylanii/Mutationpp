@@ -611,7 +611,11 @@ void getSurfaceRes(double* const p_res)
 
     void setSubIterationsSurfaceBalance(const int& iter){ setSubIterations(iter); }
 
-    double getSurfaceRadiativeHeatFlux() {return mp_surf_rad->surfaceNetRadiativeHeatFlux();}
+    double getSurfaceRadiativeHeatFlux() {
+        if (mp_surf_rad == NULL)
+            return 0.0;
+        return mp_surf_rad->surfaceNetRadiativeHeatFlux();
+        }
 
     void comSurfaceDiffusionVelocity(const Eigen::VectorXd& v_x, double* vdi)
     {
