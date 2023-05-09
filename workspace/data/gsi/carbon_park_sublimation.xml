@@ -10,10 +10,18 @@
     <surface_features solid_conduction = "steady_state" surface_in_thermal_equil = "true" gas_radiation = "false" />
 
     <surface_chemistry>
-	<!-- 5 -->
+	    <!-- 3 -->
+        <reaction type= "ablation" formula="C-b => C">
+            <sublimationkl alpha="0.14" p_vap="85715" q_vap="18.69" />
+        </reaction>
+        <!-- 4 -->
+        <reaction type= "ablation" formula="2C-b => C2">
+            <sublimationkl alpha="0.26" p_vap="98363" q_vap="22.20" />
+        </reaction>
+        <!-- 5 -->
         <reaction type= "ablation" formula="3C-b => C3">
             <sublimationkl alpha="0.03" p_vap="93227" q_vap="23.93" />
-    	</reaction>
+        </reaction>
     </surface_chemistry>
 
     <surface_radiation emissivity="0.86" T_env="0."/>

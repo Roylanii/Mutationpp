@@ -25,12 +25,28 @@
 	<!-- 5 -->
         <reaction type= "ablation" formula="3C-b => C3">
             <sublimationkl alpha="0.03" p_vap="93227" q_vap="23.93" />
-    	</reaction>
+        </reaction>
+	    <!-- 2 -->
+        <reaction type= "ablation" formula="C-b + N => CN">
+            <gamma_const> N:0.003 </gamma_const>
+        </reaction>
+        <!-- 4 -->
+        <reaction type= "catalysis" formula="O + O => O2">
+                <gamma_const> O:0.001 </gamma_const>
+        </reaction>
+        <!-- 5 -->
+        <reaction type= "catalysis" formula="N + O => NO">
+                <gamma_const> N:0.002 O:0.002 </gamma_const>
+        </reaction>
+        <!-- 6 -->
+        <reaction type= "catalysis" formula="N + N => N2">
+            <gamma_const> N:0.001 </gamma_const>
+        </reaction>
 	<!-- 6 -->
         <reaction type= "ablation" formula="C-b +O2 => CO + O">
             <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
         </reaction>
     </surface_chemistry>
 
-    <surface_radiation emissivity="0.86" T_env="0."/>
+    <surface_radiation1 emissivity="0.86" T_env="0."/>
 </gsi>
