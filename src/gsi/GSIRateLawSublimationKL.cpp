@@ -74,25 +74,26 @@ public:
     {
     	double Twall = v_Twall(pos_T_trans);
 
-        // double sat_vap_p = std::exp(-m_ps/Twall+m_qs);
-        // m_thermo.setState(
-        //     v_rhoi.data(), v_Twall.data(), set_state_with_rhoi_T);
-        // double ps = v_rhoi(mv_prod[idx_gas_prod]) * RU * Twall/m_thermo.speciesMw(mv_prod[idx_gas_prod])/101325.0;
-
-        // double sp_thermal_speed = m_transport.speciesThermalSpeed2(
-        //                               mv_prod[idx_gas_prod]);
-        // return (sat_vap_p - ps)*m_alpha*sp_thermal_speed / m_thermo.speciesMw(mv_prod[idx_gas_prod]);
         double sat_vap_p = std::exp(-m_ps/Twall+m_qs)*101325.0;
-        double sat_vap_rho = sat_vap_p * m_thermo.speciesMw(
-                                 mv_prod[idx_gas_prod])/(RU*Twall);
         m_thermo.setState(
             v_rhoi.data(), v_Twall.data(), set_state_with_rhoi_T);
-        double sp_thermal_speed = m_transport.speciesThermalSpeed(
-                                      mv_prod[idx_gas_prod]);
+        double ps = v_rhoi(mv_prod[idx_gas_prod]) * RU * Twall/m_thermo.speciesMw(mv_prod[idx_gas_prod]);
 
-        return (sat_vap_rho - v_rhoi(mv_prod[idx_gas_prod]))*m_alpha*
-                   sp_thermal_speed/4.
-                   / m_thermo.speciesMw(mv_prod[idx_gas_prod]) / 101325.0;
+        double sp_thermal_speed = m_transport.speciesThermalSpeed2(
+                                      mv_prod[idx_gas_prod]);
+        return (sat_vap_p - ps)*m_alpha*sp_thermal_speed / m_thermo.speciesMw(mv_prod[idx_gas_prod]);
+
+        // double sat_vap_p = std::exp(-m_ps/Twall+m_qs)*101325.0;
+        // double sat_vap_rho = sat_vap_p * m_thermo.speciesMw(
+        //                          mv_prod[idx_gas_prod])/(RU*Twall);
+        // m_thermo.setState(
+        //     v_rhoi.data(), v_Twall.data(), set_state_with_rhoi_T);
+        // double sp_thermal_speed = m_transport.speciesThermalSpeed(
+        //                               mv_prod[idx_gas_prod]);
+
+        // return (sat_vap_rho - v_rhoi(mv_prod[idx_gas_prod]))*m_alpha*
+        //            sp_thermal_speed/4.
+        //            / m_thermo.speciesMw(mv_prod[idx_gas_prod]);
     }
 
 private:
