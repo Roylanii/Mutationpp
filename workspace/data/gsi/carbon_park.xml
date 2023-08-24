@@ -14,26 +14,18 @@
         <reaction type= "ablation" formula="C-b + O => CO">
             <gamma_T pre_exp="0.63" T="1160.0" />
         </reaction>
-        <!-- 2 -->
+        <!-- 2 original nitridation efficiency y = 0.3, which is likely to high -->
         <reaction type= "ablation" formula="C-b + N => CN">
-            <gamma_const> N:0.003 </gamma_const>
+            <gamma_T pre_exp="0.05" T="0.0" />
         </reaction>
         <!-- 3 -->
-        <reaction type= "ablation" formula="C-b => C">
-            <sublimationkl alpha="0.14" p_vap="85715" q_vap="18.69" />
-    	</reaction>
-	<!-- 4 -->
-        <reaction type= "ablation" formula="2C-b => C2">
-            <sublimationkl alpha="0.26" p_vap="98363" q_vap="22.20" />
-    	</reaction>
-	<!-- 5 -->
         <reaction type= "ablation" formula="3C-b => C3">
-            <sublimationkl alpha="0.03" p_vap="93227" q_vap="23.93" />
-    	</reaction>
-	<!-- 6 -->
-        <reaction type= "ablation" formula="C-b +O2 => CO + O">
-            <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
+            <subgamma pre_exp="5.19E13" T="93311.9" />
+        </reaction>
+	    <!-- 4 -->
+        <reaction type= "ablation" formula="2C-b +O2 => 2CO">
+            <gamma_T pre_exp="0.5" T="0.0" />
         </reaction>
     </surface_chemistry>
-    <surface_radiation emissivity="0.86" T_env="0."/>
+    <surface_radiation emissivity="1.0" T_env="0."/>
 </gsi>

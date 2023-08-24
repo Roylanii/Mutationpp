@@ -21,17 +21,17 @@
 
 cmake_minimum_required(VERSION 2.6)
 cmake_policy(SET CMP0022 NEW)
-#切换静态编译或动态编译
-# add_library(mutation++_fortran
-#     SHARED 
-#         cwrapper.cpp 
-#         cwrapper_interface.f90
-# )
+# 切换静态编译或动态编译
 add_library(mutation++_fortran
-    STATIC 
+    SHARED 
         cwrapper.cpp 
         cwrapper_interface.f90
 )
+# add_library(mutation++_fortran
+#     STATIC 
+#         cwrapper.cpp 
+#         cwrapper_interface.f90
+# )
 add_library(mutation++::fortran_interface ALIAS mutation++_fortran)
 
 set_target_properties(mutation++_fortran 

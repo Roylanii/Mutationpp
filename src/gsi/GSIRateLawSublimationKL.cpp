@@ -81,6 +81,9 @@ public:
 
         double sp_thermal_speed = m_transport.speciesThermalSpeed2(
                                       mv_prod[idx_gas_prod]);
+        // std::cout <<"twall" << Twall << "vap:" << sat_vap_p << "ps:"<< ps << std::endl;
+        if(sat_vap_p <= ps)
+            return 0.0;
         return (sat_vap_p - ps)*m_alpha*sp_thermal_speed / m_thermo.speciesMw(mv_prod[idx_gas_prod]);
 
         // double sat_vap_p = std::exp(-m_ps/Twall+m_qs)*101325.0;
