@@ -39,5 +39,5 @@
             <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
         </reaction>
     </surface_chemistry>
-    <surface_radiation emissivity="0.86" T_env="0."/>
+    <surface_radiation emissivity="1.0" T_env="0."/>
 </gsi>
