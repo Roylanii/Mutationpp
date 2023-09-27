@@ -12,12 +12,16 @@
     <surface_chemistry>
         <!-- 1 -->
         <reaction type= "ablation" formula="C-b + O => CO">
-            <gamma_T pre_exp="0.9" T="0.0" />
+            <gamma_T pre_exp="0.63" T="1160.0" />
         </reaction>
         <!-- 2 -->
-	<!--<reaction type= "ablation" formula="C-b + N => CN">
+        <reaction type= "ablation" formula="2C-b + O2 => 2CO">
+            <gamma_T pre_exp="0.5" T="0.0" />
+        </reaction>
+        <!-- 2 original nitridation efficiency y = 0.3, which is likely to high-->
+        <reaction type= "ablation" formula="C-b + N => CN">
             <gamma_T pre_exp="0.005" T="0.0" />
-	</reaction> -->
+        </reaction>
         <!-- 3 -->
         <reaction type= "ablation" formula="C-b => C">
             <sublimationkl alpha="0.14" p_vap="85715" q_vap="18.69" />
@@ -31,8 +35,20 @@
             <sublimationkl alpha="0.03" p_vap="93227" q_vap="23.93" />
     	</reaction>
 	<!-- 6 -->
-        <reaction type= "ablation" formula="2C-b +O2 => 2CO">
-            <gamma_T pre_exp="0.01" T="0.0" />
+        <reaction type= "ablation" formula="C-b +O2 => CO + O">
+            <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
+    </reaction>
+	            <!-- 4 -->
+           <reaction type= "catalysis" formula="O + O => O2">
+              <gamma_const> O:0.001 </gamma_const>
+           </reaction>
+        <!-- 5 -->
+           <reaction type= "catalysis" formula="N + O => NO">
+             <gamma_const> N:0.002 O:0.002 </gamma_const>
+           </reaction>
+        <!-- 6 -->
+        <reaction type= "catalysis" formula="N + N => N2">
+            <gamma_const> N:0.001 </gamma_const>
         </reaction>
     </surface_chemistry>
     <surface_radiation emissivity="1.0" T_env="0."/>

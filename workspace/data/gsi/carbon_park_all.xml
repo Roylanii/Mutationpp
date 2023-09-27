@@ -25,10 +25,9 @@
 	<!-- 5 -->
         <reaction type= "ablation" formula="3C-b => C3">
             <sublimationkl alpha="0.03" p_vap="93227" q_vap="23.93" />
-        </reaction>
-	    <!-- 2 -->
-        <reaction type= "ablation" formula="C-b + N => CN">
-            <gamma_const> N:0.003 </gamma_const>
+    	</reaction>
+	<reaction type= "ablation" formula="C-b + N => CN">
+            <gamma_T pre_exp="0.005" T="0.0" />
         </reaction>
         <!-- 4 -->
         <reaction type= "catalysis" formula="O + O => O2">

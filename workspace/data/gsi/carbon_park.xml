@@ -15,10 +15,14 @@
             <gamma_T pre_exp="0.63" T="1160.0" />
         </reaction>
         <!-- 2 original nitridation efficiency y = 0.3, which is likely to high -->
-        <reaction type= "ablation" formula="C-b + N => CN">
+        <!-- <reaction type= "ablation" formula="C-b + N => CN">
             <gamma_T pre_exp="0.05" T="0.0" />
-        </reaction>
-        <!-- 3 -->
+	</reaction> -->
+	<!-- 6 -->
+        <reaction type= "ablation" formula="C-b +O2 => CO + O">
+            <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
+    	</reaction>
+	<!-- 3 -->
         <reaction type= "ablation" formula="3C-b => C3">
             <subgamma pre_exp="5.19E13" T="93311.9" />
         </reaction>

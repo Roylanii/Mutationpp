@@ -15,9 +15,9 @@
             <gamma_T pre_exp="0.9" T="0.0" />
         </reaction>
         <!-- 2 -->
-	<!--<reaction type= "ablation" formula="C-b + N => CN">
+        <reaction type= "ablation" formula="C-b + N => CN">
             <gamma_T pre_exp="0.005" T="0.0" />
-	</reaction> -->
+        </reaction>
         <!-- 3 -->
         <reaction type= "ablation" formula="C-b => C">
             <sublimationkl alpha="0.14" p_vap="85715" q_vap="18.69" />
@@ -33,6 +33,18 @@
 	<!-- 6 -->
         <reaction type= "ablation" formula="2C-b +O2 => 2CO">
             <gamma_T pre_exp="0.01" T="0.0" />
+       </reaction>
+	<!-- 4 -->
+           <reaction type= "catalysis" formula="O + O => O2">
+              <gamma_const> O:0.001 </gamma_const>
+           </reaction>
+        <!-- 5 -->
+           <reaction type= "catalysis" formula="N + O => NO">
+             <gamma_const> N:0.002 O:0.002 </gamma_const>
+           </reaction>
+        <!-- 6 -->
+        <reaction type= "catalysis" formula="N + N => N2">
+            <gamma_const> N:0.001 </gamma_const>
         </reaction>
     </surface_chemistry>
     <surface_radiation emissivity="1.0" T_env="0."/>

@@ -5,7 +5,7 @@
                  enthalpy_surface="0." />
     </surface_properties>
 
-    <solid_properties virgin_to_surf_density_ratio = "1." enthalpy_virgin = "5.0e6"/>
+    <solid_properties virgin_to_surf_density_ratio = "1." enthalpy_virgin = "0.0e6"/>
 
     <surface_features solid_conduction = "steady_state" surface_in_thermal_equil = "true" gas_radiation = "false" />
 
@@ -15,8 +15,8 @@
             <gamma_T pre_exp="0.63" T="1160.0" />
         </reaction>
         <!-- 2 -->
-        <reaction type= "catalysis" formula="O + O => O2">
-            <catalytic_T pre_exp="0.63" T="1160.0" />
+        <reaction type= "ablation" formula="2C-b + O2 => 2CO">
+            <gamma_T pre_exp="0.5" T="0.0" />
         </reaction>
         <!-- 2 original nitridation efficiency y = 0.3, which is likely to high-->
         <!-- <reaction type= "ablation" formula="C-b + N => CN">
@@ -39,5 +39,5 @@
             <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
         </reaction>
     </surface_chemistry>
-    <surface_radiation emissivity="0.86" T_env="0."/>
+    <surface_radiation emissivity="1.0" T_env="0."/>
 </gsi>

@@ -16,7 +16,7 @@
         </reaction>
         <!-- 2 -->
         <reaction type= "ablation" formula="C-b + N => CN">
-            <gamma_const> N:0.003 </gamma_const>
+            <gamma_T pre_exp="0.005" T="0.0" />
         </reaction>
         <!-- 3 -->
         <reaction type= "ablation" formula="3C-b => C3">
