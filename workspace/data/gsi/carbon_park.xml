@@ -5,7 +5,7 @@
                  enthalpy_surface="0." />
     </surface_properties>
 
-    <solid_properties virgin_to_surf_density_ratio = "1." enthalpy_virgin = "5.0e6"/>
+<solid_properties virgin_to_surf_density_ratio = "1." enthalpy_virgin = "0.0e6"/>
 
     <surface_features solid_conduction = "steady_state" surface_in_thermal_equil = "true" gas_radiation = "false" />
 
