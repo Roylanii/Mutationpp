@@ -364,6 +364,7 @@ void getSurfaceRes(double* const p_res)
         mv_f(pos_E) += solid_heat;
         m_thermo.getEnthalpiesMass(mv_hi.data());
         double hmix = m_thermo.mixtureHMass();
+        // 注释扩散焓
         mv_f(pos_E) +=
            mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum());
         mv_f(pos_E) += hmix*mass_blow;
@@ -434,6 +435,7 @@ void getSurfaceRes(double* const p_res)
         m_thermo.getEnthalpiesMass(mv_hi.data());
         double hmix = m_thermo.mixtureHMass();
 
+// 注释扩散焓
         mv_f(pos_E) +=
            mv_hi.head(m_ns).dot(mv_Vdiff*mv_rhoi.sum());
         mv_f(pos_E) += hmix*mass_blow;
