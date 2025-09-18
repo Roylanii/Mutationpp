@@ -455,9 +455,6 @@ void NAME_MANGLE(surface_mass_balance)(const double *const p_Yke, const double *
 }
 
 //==============================================================================
-<<<<<<< HEAD
-void NAME_MANGLE(source_energy_transfer)(double *const p_source_transfer)
-=======
 void NAME_MANGLE(get_composition)
     (F_STRING mixture, double* const p_Yk, F_STRLEN mixture_length)
 {
