@@ -83,8 +83,7 @@ public:
 
         double sp_thermal_speed = m_transport.speciesThermalSpeed(
                                       mv_prod[idx_gas_prod]);
-        if(sat_vap_rho <= v_rhoi(mv_prod[idx_gas_prod]))
-            return 0.0;
+
         return (sat_vap_rho - v_rhoi(mv_prod[idx_gas_prod]))*m_vap_coef*
                    sp_thermal_speed/4.
                    / m_thermo.speciesMw(mv_prod[idx_gas_prod]);
