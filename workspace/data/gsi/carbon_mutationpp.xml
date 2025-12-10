@@ -23,5 +23,5 @@
             <sublimation vap_coef="0.1" pre_exp="5.19E15" T="90845." />
         </reaction>
     </surface_chemistry>
-    <surface_radiation emissivity="1.0" T_env="0."/>
+    <surface_radiation emissivity="0.8" T_env="0."/>
 </gsi>

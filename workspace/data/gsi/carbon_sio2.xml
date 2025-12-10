@@ -1,0 +1,37 @@
+<gsi gsi_mechanism = "phenomenological_mass_energy">
+
+    <surface_properties type = "ablation" >
+        <surface label="b" species="SiO2"
+		enthalpy_surface="0." />
+       <surface label="b" species="C"
+                 enthalpy_surface="0." />
+    </surface_properties>
+
+<solid_properties virgin_to_surf_density_ratio = "0." enthalpy_virgin = "0.0e6"/>
+
+    <surface_features solid_conduction = "steady_state" surface_in_thermal_equil = "true" gas_radiation = "false" />
+
+    <surface_chemistry>
+        <!-- 1 -->
+        <!--reaction type= "ablation" formula="C-b + O => CO">
+            <gamma_T pre_exp="0.63" T="1160.0" />
+        </reaction> -->
+        <!-- 2 original nitridation efficiency y = 0.3, which is likely to high -->
+        <!-- <reaction type= "ablation" formula="C-b + N => CN">
+            <gamma_T pre_exp="0.05" T="0.0" />
+	</reaction> -->
+	<!-- 6 -->
+        <!--reaction type= "ablation" formula="C-b +O2 => CO + O">
+            <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
+	</reaction> -->
+	<!-- 3 -->
+        <reaction type= "ablation" formula="SiO2-b + C-b => SiO + CO">
+            <subgamma pre_exp="1.25E8" T="46300" />
+        </reaction>
+	    <!-- 4 -->
+        <!--reaction type= "ablation" formula="2C-b +O2 => 2CO">
+            <gamma_T pre_exp="0.5" T="0.0" />
+	</reaction> -->
+    </surface_chemistry>
+    <surface_radiation emissivity="1.0" T_env="0."/>
+</gsi>
