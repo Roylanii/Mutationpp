@@ -24,6 +24,10 @@
         <!--reaction type= "ablation" formula="C-b +O2 => CO + O">
             <gamma_T2 acof="1.43e-3" aexp="0.01" aEa="1450" bcof="1.0" bexp="2.0e-4" bEa="-13000"/>
 	</reaction> -->
+	 <!-- 3 -->
+        <reaction type= "ablation" formula="SiO2-b => SiO2">
+            <sublimationkl alpha="0.001" p_vap="5.23E4" q_vap="26.74" />
+        </reaction>
 	<!-- 3 -->
         <reaction type= "ablation" formula="SiO2-b + C-b => SiO + CO">
             <subgamma pre_exp="1.25E8" T="46300" />
